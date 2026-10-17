@@ -1,5 +1,4 @@
 /* STATIC SITE CSS */
-
 /* ---------- Fonts ---------- */
 
 @font-face {
@@ -118,7 +117,11 @@ html {
 	scroll-padding-top: calc(var(--nav-h) + var(--pad-top));
 }
 
+/* Column layout keeps the footer at the viewport bottom on short pages */
 body {
+	display: flex;
+	flex-direction: column;
+	min-block-size: var(--vh-static, 100svh);
 	font: var(--step-0) / var(--leading) var(--font-body);
 }
 
@@ -317,6 +320,7 @@ nav > [data-is="undone-text-logo"] {
 
 [data-is="hk-time"] {
 	font: var(--step--2) / 1 var(--font-mono);
+	text-transform: uppercase;
 	letter-spacing: var(--track-caps);
 	opacity: 0.7;
 }
@@ -417,7 +421,9 @@ nav > [data-is="undone-text-logo"] {
 /* ---------- Main grid ---------- */
 
 main {
+	flex: 1;
 	display: grid;
+	align-content: start;
 	grid-template-columns: repeat(12, minmax(0, 1fr));
 	column-gap: var(--gutter);
 	row-gap: var(--space-xl);
@@ -729,6 +735,8 @@ textarea {
 	padding-block-start: var(--space-s);
 	border-block-start: var(--hairline) solid var(--rule);
 	font: var(--step--2) / 1 var(--font-mono);
+	text-transform: uppercase;
+	letter-spacing: var(--track-caps);
 	opacity: 0.7;
 }
 
