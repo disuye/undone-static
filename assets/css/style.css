@@ -1,3 +1,5 @@
+/* STATIC SITE CSS */
+
 /* ---------- Fonts ---------- */
 
 @font-face {
@@ -531,7 +533,7 @@ article figure img {
 [data-is="quote"] > p:first-child::before { content: "“"; }
 [data-is="quote"] > p:first-child::after { content: "”"; }
 
-[data-is="quote"] > p:last-child {
+[data-is="quote"] > p + p {
 	font: var(--step--2) / 1 var(--font-mono);
 	text-transform: uppercase;
 	letter-spacing: var(--track-caps);
@@ -578,7 +580,7 @@ main > [data-is="spec"] {
 		repeating-linear-gradient(-45deg, var(--ink) 0 var(--hazard), var(--neon) 0 calc(var(--hazard) * 2)) top / 100% var(--hazard) no-repeat,
 		var(--neon);
 	color: var(--ink);
-	font: 800 var(--step-1) / 1.2 var(--font-display);
+	font: 700 var(--step-1) / 1.2 var(--font-display);
 	text-transform: uppercase;
 	letter-spacing: var(--track-tight);
 }
