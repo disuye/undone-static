@@ -33,6 +33,7 @@
 
 	--orange: rgb(var(--orange-rgb));
 	--ink: rgb(var(--ink-rgb));
+	--ink-opacity: rgba(var(--ink-rgb) / 0.85);
 	--paper: rgb(var(--paper-rgb));
 	--neon: rgb(var(--neon-rgb));
 	--rule: rgb(var(--paper-rgb) / 0.25);
@@ -484,7 +485,7 @@ main > :is(article, figure) {
 	align-content: start;
 	gap: var(--space-s);
 	padding: var(--space-m);
-	background: var(--ink);
+	background: var(--ink-opacity);
 	border-block-start: var(--rule-heavy) solid var(--paper);
 }
 
