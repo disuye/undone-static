@@ -596,10 +596,11 @@ main > [data-is="spec"] {
 	letter-spacing: var(--track-tight);
 }
 
-[data-is="banner"] [data-is="cta"] {
+[data-is="cta"] {
 	padding: var(--space-2xs) var(--space-s);
 	background: var(--ink);
 	color: var(--neon);
+	max-width: fit-content;
 }
 
 /* ---------- Dialog (statement + contact + P.S.) ---------- */
