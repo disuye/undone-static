@@ -26,17 +26,15 @@
 
 :root {
 	--orange-rgb: 255 90 44;   		/* #FF5A2C */
-	--nasared-rgb: 202 41 64;   	/* #CA2940 inspired by NASA */
 	--ink-rgb: 0 0 0;          		/* #000000 */
 	--warmgray-rgb: 171 169 161;	/* #ABA9A1 inspired by NASA WarmGray*/
 	--paper-rgb: 247 254 255;  		/* #F7FEFF */
 	--neon-rgb: 253 253 13;    		/* #FDFD0D */
 
 	--orange: rgb(var(--orange-rgb));
-	--nasared: rgb(var(--nasared-rgb));
 	--warmgray: rgb(var(--warmgray-rgb));
 	--ink: rgb(var(--ink-rgb));
-	--ink-85: rgba(var(--ink-rgb) / 0.55);
+	--ink-55: rgba(var(--ink-rgb) / 0.55);
 	--ink-15: rgba(var(--ink-rgb) / 0.15);
 	--paper: rgb(var(--paper-rgb));
 	--neon: rgb(var(--neon-rgb));
@@ -430,6 +428,7 @@ main {
 	flex: 1;
 	display: grid;
 	align-content: start;
+	align-items: start;
 	grid-template-columns: repeat(12, minmax(0, 1fr));
 	column-gap: var(--gutter);
 	row-gap: var(--space-xl);
@@ -490,9 +489,8 @@ main > :is(article, figure) {
 	align-content: start;
 	gap: var(--space-s);
 	padding: var(--space-m);
-	background: var(--ink-85);
+	background: var(--ink-55);
 	border-block-start: var(--rule-heavy) solid var(--paper);
-	height: fit-content;
 }
 
 article h3 {
@@ -602,7 +600,7 @@ main > [data-is="spec"] {
 	padding: var(--space-2xs) var(--space-s);
 	background: var(--ink);
 	color: var(--neon);
-	max-width: fit-content;
+	justify-self: start;
 }
 
 /* ---------- Dialog (statement + contact + P.S.) ---------- */
@@ -698,9 +696,8 @@ textarea {
 	grid-column: 1 / -1;
 }
 
-[data-is="footer"] > :is(form) {
-	width: fit-content;
-	margin-left: auto;
+[data-is="footer"] > form {
+	justify-self: end;
 }
 
 [data-is="large-logo"] {
@@ -766,8 +763,8 @@ textarea {
 /* ---------- Reveal on scroll ---------- */
 
 @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
-	:is([data-is="card"],  [data-is="banner"], [data-is="photo"], [data-is="divider"], [data-is="quote"], [data-is="spec"], [data-is="dialog"]):not([data-revealed]) { opacity: 0; }
-	[data-revealed] { animation: reveal var(--t-reveal) var(--ease) var(--reveal-delay, 0ms) both; }
+	main > :not([data-revealed]) { opacity: 0; }
+	main > [data-revealed] { animation: reveal var(--t-reveal) var(--ease) var(--reveal-delay, 0ms) both; }
 }
 
 @keyframes reveal {

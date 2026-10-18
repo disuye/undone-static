@@ -139,8 +139,7 @@ const revealOnScroll = (els) => {
   els.forEach((el) => observer.observe(el));
 };
 
-revealOnScroll(document.querySelectorAll(
-  ['card', 'photo', 'divider', 'quote', 'spec', 'banner', 'dialog'].map((name) => `[data-is="${name}"]`).join()));
+revealOnScroll(document.querySelectorAll('main > *'));
 document.querySelectorAll('[data-is="vertical-logo"]').forEach(driveParallax);
 document.querySelectorAll('button[aria-controls][aria-expanded]').forEach(toggleDisclosure);
 document.querySelectorAll('[data-is="nav-menu"]').forEach(closeMenuOnNavigate);
