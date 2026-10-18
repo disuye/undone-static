@@ -698,6 +698,11 @@ textarea {
 	grid-column: 1 / -1;
 }
 
+[data-is="footer"] > :is(form) {
+	width: fit-content;
+	margin-left: auto;
+}
+
 [data-is="large-logo"] {
 	inline-size: var(--footer-logo);
 	aspect-ratio: 3156 / 730;
