@@ -127,6 +127,20 @@ const driveParallax = (el) => {
   update();
 };
 
+// Staggers cards that enter together; CSS keeps unrevealed cards hidden.
+const revealOnScroll = (els) => {
+  const observer = new IntersectionObserver((entries) => {
+    entries.filter((e) => e.isIntersecting).forEach(({ target }, i) => {
+      target.style.setProperty('--reveal-delay', `${i * 120}ms`);
+      target.dataset.revealed = '';
+      observer.unobserve(target);
+    });
+  }, { rootMargin: '0px 0px -10% 0px' });
+  els.forEach((el) => observer.observe(el));
+};
+
+revealOnScroll(document.querySelectorAll(
+  ['card', 'photo', 'divider', 'quote', 'spec', 'banner', 'dialog'].map((name) => `[data-is="${name}"]`).join()));
 document.querySelectorAll('[data-is="vertical-logo"]').forEach(driveParallax);
 document.querySelectorAll('button[aria-controls][aria-expanded]').forEach(toggleDisclosure);
 document.querySelectorAll('[data-is="nav-menu"]').forEach(closeMenuOnNavigate);

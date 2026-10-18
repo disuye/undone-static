@@ -88,6 +88,7 @@
 	--t: 150ms;
 	--t-slow: 300ms;
 	--t-cue: 2s;
+	--t-reveal: 600ms;
 	--ease: ease-in-out;
 	--ease-spring: linear(0, 0.42 12%, 0.84 26%, 1.06 42%, 1.02 58%, 0.99 74%, 1);
 
@@ -491,6 +492,7 @@ main > :is(article, figure) {
 	padding: var(--space-m);
 	background: var(--ink-85);
 	border-block-start: var(--rule-heavy) solid var(--paper);
+	height: fit-content;
 }
 
 article h3 {
@@ -754,6 +756,18 @@ textarea {
 	[data-is="footer"] > :is([data-is="large-logo"], form) {
 		grid-column: auto;
 	}
+}
+
+/* ---------- Reveal on scroll ---------- */
+
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+	:is([data-is="card"],  [data-is="banner"], [data-is="photo"], [data-is="divider"], [data-is="quote"], [data-is="spec"], [data-is="dialog"]):not([data-revealed]) { opacity: 0; }
+	[data-revealed] { animation: reveal var(--t-reveal) var(--ease) var(--reveal-delay, 0ms) both; }
+}
+
+@keyframes reveal {
+	from { opacity: 0; translate: 0 var(--space-m); }
+	to { opacity: 1; translate: 0 0; }
 }
 
 /* ---------- Motion preferences ---------- */
