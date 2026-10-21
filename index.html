@@ -29,14 +29,16 @@
 
 		<link rel="preload" href="assets/fonts/BricolageGrotesque-Variable-latin.woff2" as="font" type="font/woff2" crossorigin>
 		<link rel="preload" href="assets/fonts/SchibstedGrotesk-Variable-latin.woff2" as="font" type="font/woff2" crossorigin>
-		<link rel="preload" href="assets/fonts/Inter-Variable-latin.woff2" as="font" type="font/woff2" crossorigin>
-		<link rel="stylesheet" href="assets/css/reset.css">
+		<link rel="preload" href="assets/fonts/Inter-Variable-latin.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="assets/css/reset.css">
 		<link rel="stylesheet" href="assets/css/style.css">
+		<link rel="stylesheet" href="assets/css/scene.css">
 
 		<script src="assets/js/main.js" defer></script>
 		<script src="assets/js/crt.js" defer></script>
+		<script type="module" src="assets/js/scene/index.js"></script>
 	</head>
 	<body id="top">
+		<canvas data-is="scene" aria-hidden="true"></canvas>
 		<div data-is="vertical-logo" aria-hidden="true"></div>
 		<canvas data-is="crt" aria-hidden="true"></canvas>
 
