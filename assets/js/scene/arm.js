@@ -55,7 +55,7 @@ const workCycle = (stations, { dip, hold, strokes }) => stations.flatMap((statio
 });
 
 /**
- * Six-axis prototype arm, built pointing up local +y, reaching toward local +x.
+ * Five-axis prototype arm, built pointing up local +y, reaching toward local +x.
  * Pose = [yaw, shoulder, elbow, wrist, roll] in radians; negative pitch leans forward.
  * Asymmetry lives on ±z: ram and hose on one side, extra armour and actuator on the other.
  */
