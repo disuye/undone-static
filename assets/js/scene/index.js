@@ -14,10 +14,12 @@ const TIERS = {
 
 // Filmic cadence: 30fps divides 60/120Hz evenly (24 judders on 60Hz panels) and halves GPU work.
 const FPS = 30;
-const ENV_PROBE = new Vector3(0, 2.2, -2);
+const STEP = 1 / FPS;
+
 // Haze is a darker shade of the page ground (same hue), so the hall can go low-key.
 const HAZE = { shade: 0.32, density: 0.042 };
-const STEP = 1 / FPS;
+// Where the one-off reflection capture is taken: between the camera path and the orb.
+const ENV_PROBE = new Vector3(0, 2.2, -2);
 
 const canvas = document.querySelector('[data-is="scene"]');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -70,10 +72,10 @@ const createScene = (renderer, tint, tier) => {
   return { scene, lab };
 };
 
-// Camera dollies down the hall with page scroll; pointer adds a little parallax.
 // Pointer parallax, metres either side: ±0.9 m sideways ≈ 1.5 floor tiles (1.2 m) edge to edge.
 const PARALLAX = { x: 0.9, y: 0.12, lookX: 0.35 };
 
+// Camera dollies down the hall with page scroll; pointer adds parallax.
 const createRig = (camera) => {
   const goal = { p: scrollProgress(), x: 0, y: 0 };
   const now = { ...goal };
