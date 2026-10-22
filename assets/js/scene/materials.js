@@ -179,13 +179,25 @@ const ARMOUR = {
   },
 };
 
-const armourMaps = () => {
-  const map = canvasTexture(1024, weathering(ARMOUR.colour), true);
+// Arm finish: same wear pattern, but lightly worn and smoother; between the armour and the orb shell.
+const ARM = {
+  colour: {
+    ...ARMOUR.colour, base: '#f2f0eb', grime: (a) => `rgba(74,66,54,${a * 0.4})`,
+    scratchLight: 'rgba(255,255,255,0.3)', scratchDark: 'rgba(70,64,56,0.12)', seam: 'rgba(60,56,50,0.25)', noise: 5,
+  },
+  roughness: {
+    ...ARMOUR.roughness, base: '#474747', grime: (a) => `rgba(255,255,255,${a * 1.2})`,
+    scratchLight: 'rgba(30,30,30,0.3)', scratchDark: 'rgba(255,255,255,0.25)', noise: 8,
+  },
+};
+
+const wornMaps = (tones, relief) => {
+  const map = canvasTexture(1024, weathering(tones.colour), true);
   return {
     map,
-    roughnessMap: canvasTexture(1024, weathering(ARMOUR.roughness), false),
+    roughnessMap: canvasTexture(1024, weathering(tones.roughness), false),
     normalMap: normalFrom(map, 2),
-    normalScale: new Vector2(0.4, 0.4),
+    normalScale: new Vector2(relief, relief),
   };
 };
 
@@ -254,6 +266,34 @@ export const kelvin = (k) => {
   return new Color().setRGB(...rgb.map((v) => v / peak), SRGBColorSpace);
 };
 
+export const CEILING_K = 12000;
+
+// Far end of the hall: a wall of backlit frosted panels between dark mullions, read through the haze.
+// Unfogged so it stays a light source at 40 m; bloom supplies the glow.
+const LIGHT_WALL = { cols: 5, rows: 2, intensity: 2.2 };
+const lightWall = () => new MeshBasicMaterial({
+  map: canvasTexture(512, (ctx, size) => {
+    const { cols, rows } = LIGHT_WALL;
+    const pw = size / cols;
+    const ph = size / rows;
+    ctx.fillStyle = '#1b1c1e';
+    ctx.fillRect(0, 0, size, size);
+    for (let c = 0; c < cols; c += 1) {
+      for (let r = 0; r < rows; r += 1) {
+        const x = c * pw + pw / 2;
+        const y = r * ph + ph / 2;
+        const g = ctx.createRadialGradient(x, y, 0, x, y, Math.max(pw, ph) * 0.7);
+        g.addColorStop(0, '#ffffff');
+        g.addColorStop(1, '#b9bcc2');
+        ctx.fillStyle = g;
+        ctx.fillRect(c * pw + size * 0.012, r * ph + size * 0.012, pw - size * 0.024, ph - size * 0.024);
+      }
+    }
+  }, true),
+  color: kelvin(CEILING_K).multiplyScalar(LIGHT_WALL.intensity),
+  fog: false,
+});
+
 const emissive = (hex, intensity) => new MeshBasicMaterial({
   color: new Color(hex).multiplyScalar(intensity),
 });
@@ -266,7 +306,8 @@ const energy = (intensity, opacity) => new MeshBasicMaterial({
 const rubber = (color) => new MeshStandardMaterial({ color, roughness: 0.62 });
 
 export const createMaterials = (room) => {
-  const worn = armourMaps();
+  const worn = wornMaps(ARMOUR, 0.4);
+  const arm = wornMaps(ARM, 0.25);
   const panels = panelSet(SURFACE);
   return {
     floor: new MeshStandardMaterial({
@@ -284,6 +325,8 @@ export const createMaterials = (room) => {
     frame: new MeshStandardMaterial({ color: 0x9f9c94, roughness: 0.55 }),
     armour: new MeshPhysicalMaterial({ ...worn, color: 0xffffff, clearcoat: 0.15, clearcoatRoughness: 0.4 }),
     armourGrey: new MeshPhysicalMaterial({ ...worn, color: 0xd2cfc8, clearcoat: 0.1, clearcoatRoughness: 0.45 }),
+    armShell: new MeshPhysicalMaterial({ ...arm, color: 0xffffff, clearcoat: 0.6, clearcoatRoughness: 0.18 }),
+    armShellGrey: new MeshPhysicalMaterial({ ...arm, color: 0xdcd9d2, clearcoat: 0.45, clearcoatRoughness: 0.22 }),
     mech: new MeshStandardMaterial({ color: 0x8b8880, roughness: 0.5, metalness: 0.55 }),
     shell: new MeshPhysicalMaterial({ color: 0xf4f2ed, roughness: 0.22, clearcoat: 1, clearcoatRoughness: 0.08 }),
     liner: new MeshStandardMaterial({ color: 0x2f2d2a, roughness: 0.7, metalness: 0.3, side: BackSide }),
@@ -296,7 +339,9 @@ export const createMaterials = (room) => {
     screen: emissive(0xcfe0e4, 0.9),
     panel: emissive(0xfff9f0, 1.6),
     light: emissive(0xfffcf8, 3.2),
-    fixture: (k, intensity) => emissive(kelvin(k), intensity),
+    tube: emissive(kelvin(CEILING_K), 3.2),
+    lightWall: lightWall(),
+    beamLight: emissive(kelvin(CEILING_K), 8),
     glow: emissive(0xfff8ef, 2.4),
     neon: emissive(0xfdfd0d, 1.4),
   };

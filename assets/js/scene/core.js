@@ -5,8 +5,12 @@ import { smootherstep } from './motion.js';
 
 const RADIUS = 0.5;
 const SPREAD = 0.3;
-const CYCLE = 14;
-const LIGHT = { closed: 0.05, open: 45, reach: 12 };
+// Seconds: open, held open, close; then closed for the rest of the cycle.
+const PHASE = { open: 4.2, held: 3.5, close: 4.2 };
+const CYCLE = 24;
+// open: peak intensity, kept just under the point where the floor hotspot clips to white.
+// ease > 1 makes the light build slowly, so the floor texture reads through most of each ramp.
+const LIGHT = { closed: 0.05, open: 16, ease: 2, reach: 12 };
 
 // "Undone": a sphere of eight shells, floating unexplained, that slowly takes itself apart around a lit core.
 // The core is a shadow-casting point light, so light escapes in blades through the gaps;
@@ -58,12 +62,13 @@ export const createCore = (m, { shadows }) => {
 
   group.add(core, light, ...rings, ...shells.map((s) => s.mesh));
 
-  // Open, hold, close, hold — on a slow cycle.
   const openness = (time) => {
-    const t = (time % CYCLE) / CYCLE;
-    if (t < 0.3) return smootherstep(t / 0.3);
-    if (t < 0.55) return 1;
-    if (t < 0.85) return 1 - smootherstep((t - 0.55) / 0.3);
+    let t = time % CYCLE;
+    if (t < PHASE.open) return smootherstep(t / PHASE.open);
+    t -= PHASE.open;
+    if (t < PHASE.held) return 1;
+    t -= PHASE.held;
+    if (t < PHASE.close) return 1 - smootherstep(t / PHASE.close);
     return 0;
   };
 
@@ -75,7 +80,7 @@ export const createCore = (m, { shadows }) => {
     });
     rings[0].rotation.z = time * 0.08;
     rings[1].rotation.y = -time * 0.05;
-    light.intensity = LIGHT.closed + a * LIGHT.open;
+    light.intensity = LIGHT.closed + a ** LIGHT.ease * LIGHT.open;
     m.energy.opacity = 0.45 + a * 0.3 + Math.sin(time * 23) * Math.sin(time * 3.1) * 0.08;
     m.energyHalo.opacity = 0.08 + a * 0.08;
   };

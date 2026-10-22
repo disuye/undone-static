@@ -62,9 +62,9 @@ const workCycle = (stations, { dip, hold, strokes }) => stations.flatMap((statio
 export const createArm = (m, poses, timing) => {
   const root = new Group();
   root.add(
-    at(prism(0.56, 0.16, 8, m.armourGrey), 0, 0.08),
+    at(prism(0.56, 0.16, 8, m.armShellGrey), 0, 0.08),
     at(prism(0.42, 0.05, 8, m.mech), 0, 0.185),
-    at(plate(PROFILE.junction, 0.22, m.armourGrey), -0.2, 0.02, -0.55, 0, 0.3),
+    at(plate(PROFILE.junction, 0.22, m.armShellGrey), -0.2, 0.02, -0.55, 0, 0.3),
   );
 
   const upperHose = hose([[-0.2, 0.12, -0.18], [-0.34, 0.62, -0.24], [-0.3, 1.1, -0.22], [-0.12, 1.48, -0.2]], 0.026, m.cables[0], true);
@@ -73,40 +73,40 @@ export const createArm = (m, poses, timing) => {
   const hoses = [upperHose, upperLine, foreHose];
 
   const yaw = joint(root, 0.2,
-    at(plate(PROFILE.turret, 0.56, m.armour), 0, 0, 0.02),
-    at(prism(0.22, 0.56, 8, m.armourGrey, 'z'), 0, 0.55, 0.06),
+    at(plate(PROFILE.turret, 0.56, m.armShell), 0, 0, 0.02),
+    at(prism(0.22, 0.56, 8, m.armShellGrey, 'z'), 0, 0.55, 0.06),
     at(prism(0.13, 0.24, 6, m.mech, 'z'), -0.05, 0.55, 0.42),
     at(block(0.14, 0.1, 0.06, m.mech), -0.3, 0.3, -0.3));
   const ramBase = anchor(yaw, -0.3, 0.3, -0.33);
 
   const shoulder = joint(yaw, 0.55,
     at(block(0.15, 1.42, 0.18, m.mech), -0.02, 0.75, 0),
-    at(plate(PROFILE.upper, 0.27, m.armour), 0, 0, 0.05),
-    at(plate(PROFILE.upperSide, 0.035, m.armourGrey), 0, 0, 0.24, 0, 0.08),
-    at(prism(0.17, 0.44, 8, m.armourGrey, 'z'), 0, 1.5, -0.03),
+    at(plate(PROFILE.upper, 0.27, m.armShell), 0, 0, 0.05),
+    at(plate(PROFILE.upperSide, 0.035, m.armShellGrey), 0, 0, 0.24, 0, 0.08),
+    at(prism(0.17, 0.44, 8, m.armShellGrey, 'z'), 0, 1.5, -0.03),
     upperHose, upperLine);
   const ramHead = anchor(shoulder, -0.2, 0.92, -0.33);
 
   const elbow = joint(shoulder, 1.5,
-    at(plate(PROFILE.fore, 0.22, m.armour), 0, 0, -0.02),
-    at(plate(PROFILE.foreFin, 0.03, m.armourGrey), 0.1, 0.3, -0.15, 0, -0.12),
+    at(plate(PROFILE.fore, 0.22, m.armShell), 0, 0, -0.02),
+    at(plate(PROFILE.foreFin, 0.03, m.armShellGrey), 0.1, 0.3, -0.15, 0, -0.12),
     at(prism(0.035, 0.78, 6, m.steel), 0.05, 0.6, 0.16),
     at(prism(0.06, 0.12, 6, m.mech), 0.05, 0.18, 0.16),
-    at(prism(0.11, 0.3, 6, m.armourGrey, 'z'), 0, 1.2, 0.02),
+    at(prism(0.11, 0.3, 6, m.armShellGrey, 'z'), 0, 1.2, 0.02),
     foreHose);
 
   const wrist = joint(elbow, 1.2,
-    at(plate(PROFILE.wrist, 0.19, m.armour), 0, 0, 0.01));
+    at(plate(PROFILE.wrist, 0.19, m.armShell), 0, 0, 0.01));
 
   const roll = joint(wrist, 0.28,
     at(prism(0.09, 0.06, 8, m.steel), 0, 0.03),
-    at(plate(PROFILE.fingerLong, 0.05, m.armourGrey), 0.03, 0.05, 0),
-    at(plate(PROFILE.fingerShort, 0.05, m.armourGrey), -0.03, 0.05, 0),
+    at(plate(PROFILE.fingerLong, 0.05, m.armShellGrey), 0.03, 0.05, 0),
+    at(plate(PROFILE.fingerShort, 0.05, m.armShellGrey), -0.03, 0.05, 0),
     at(prism(0.045, 0.12, 6, m.mech, 'z'), 0, 0.07, 0.1),
     at(prism(0.03, 0.02, 12, m.glow, 'z'), 0, 0.07, 0.165),
     at(prism(0.03, 0.02, 12, m.glow), 0, 0.12, -0.03));
 
-  const ram = createPiston(root, ramBase, ramHead, m.armourGrey, m.steel);
+  const ram = createPiston(root, ramBase, ramHead, m.armShellGrey, m.steel);
   const { hold = 1, strokes = 3, speed = 1, dip = DIP, offset = 0 } = timing;
   const sequence = createSequencer(workCycle(poses, { dip, hold, strokes }), {
     speeds: JOINT_SPEED.map((v) => v * speed), minMove: 0.35 / speed, offset,

@@ -8,13 +8,15 @@ import { damp } from './motion.js';
 
 // coreShadows: cube-map size for the orb's point light (0 = no shadows; it's 6 extra passes).
 const TIERS = {
-  high: { pixelRatio: 1.5, dust: 3200, shadowMap: 1024, coreShadows: 512 },
-  low: { pixelRatio: 1, dust: 1400, shadowMap: 512, coreShadows: 0 },
+  high: { pixelRatio: 1.5, dust: 1600, shadowMap: 1024, coreShadows: 512 },
+  low: { pixelRatio: 1, dust: 700, shadowMap: 512, coreShadows: 0 },
 };
 
 // Filmic cadence: 30fps divides 60/120Hz evenly (24 judders on 60Hz panels) and halves GPU work.
 const FPS = 30;
 const ENV_PROBE = new Vector3(0, 2.2, -2);
+// Haze is a darker shade of the page ground (same hue), so the hall can go low-key.
+const HAZE = { shade: 0.32, density: 0.042 };
 const STEP = 1 / FPS;
 
 const canvas = document.querySelector('[data-is="scene"]');
@@ -47,9 +49,9 @@ const createRenderer = () => {
 
 const createScene = (renderer, tint, tier) => {
   const scene = new Scene();
-  const fog = new Color().setRGB(...tint, SRGBColorSpace);
+  const fog = new Color().setRGB(...tint, SRGBColorSpace).multiplyScalar(HAZE.shade);
   scene.background = fog;
-  scene.fog = new FogExp2(fog, 0.042);
+  scene.fog = new FogExp2(fog, HAZE.density);
 
   // Generic room first (one bounce), then a one-off capture of the lab itself so reflections match it.
   const pmrem = new PMREMGenerator(renderer);
@@ -62,13 +64,16 @@ const createScene = (renderer, tint, tier) => {
   scene.add(lab.group);
 
   scene.environment = pmrem.fromScene(scene, 0.04, 0.1, 60, { position: ENV_PROBE }).texture;
-  scene.environmentIntensity = 0.7;
+  scene.environmentIntensity = 0.25;
   seed.dispose();
   pmrem.dispose();
   return { scene, lab };
 };
 
 // Camera dollies down the hall with page scroll; pointer adds a little parallax.
+// Pointer parallax, metres either side: ±0.9 m sideways ≈ 1.5 floor tiles (1.2 m) edge to edge.
+const PARALLAX = { x: 0.9, y: 0.12, lookX: 0.35 };
+
 const createRig = (camera) => {
   const goal = { p: scrollProgress(), x: 0, y: 0 };
   const now = { ...goal };
@@ -85,8 +90,8 @@ const createRig = (camera) => {
     now.x = damp(now.x, goal.x, 2, dt);
     now.y = damp(now.y, goal.y, 2, dt);
     const drift = Math.sin(time * 0.05) * 0.25;
-    camera.position.set(drift + now.x * 0.35, 2.6 - now.p * 0.5 - now.y * 0.12, 8.5 - now.p * 9);
-    look.set(now.x * 0.15, 0.85 + now.p * 0.4, CELL.z - 1 - now.p * 4);
+    camera.position.set(drift + now.x * PARALLAX.x, 2.6 - now.p * 0.5 - now.y * PARALLAX.y, 8.5 - now.p * 9);
+    look.set(now.x * PARALLAX.lookX, 0.85 + now.p * 0.4, CELL.z - 1 - now.p * 4);
     camera.lookAt(look);
     return camera.position.distanceTo(CELL);
   };
