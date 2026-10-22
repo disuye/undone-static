@@ -118,6 +118,9 @@ html {
 	color: var(--paper);
 	overflow-x: clip;
 	scroll-behavior: smooth;
+}
+
+html:has([data-is="masthead"] > nav) {
 	scroll-padding-top: calc(var(--nav-h) + var(--pad-top));
 }
 
