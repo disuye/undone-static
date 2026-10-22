@@ -85,23 +85,31 @@ const lights = () => {
 };
 
 // Arm placements relative to the work cell; poses lean in toward the core.
+// The right arm also works under the orb, reaching up at 50°; its CLEAR via tucks the arm
+// back so the swap between topside and underside work doesn't sweep through it.
+const CLEAR = { via: [0, 0.25, -1.4, 1, 0] };
+const UNDER_DIP = [0, 0.03, 0.14, -0.17, -0.9];
+
 const ARMS = [
   {
-    at: [-2.7, 0, -5.2], flip: false, timing: { hold: 1.1, offset: 0 },
+    at: [-2.7, 0, -5.2], flip: false, timing: { hold: 0.95, strokes: 3, offset: 0 },
     poses: [
       [0.1, -0.5, -0.8, -0.6, 0], [-0.25, -0.35, -1.05, -0.4, 1.4],
       [0.3, -0.6, -0.6, -0.9, 0.4], [0, -0.2, -1.2, -0.2, -1],
     ],
   },
   {
-    at: [2.8, 0, -6.9], flip: false, timing: { hold: 0.8, offset: 2.1, dip: [0, -0.06, -0.1, -0.12, -1.1] },
+    at: [2.8, 0, -6.9], flip: false, timing: { hold: 0.6, strokes: 4, offset: 2.1, dip: [0, -0.04, -0.06, -0.12, -1.1] },
     poses: [
-      [-0.2, -0.45, -0.9, -0.5, 0.6], [0.2, -0.65, -0.5, -0.8, -0.6],
-      [0, -0.3, -1.1, -0.3, 1.8], [-0.35, -0.55, -0.7, -0.7, 0],
+      [-0.2, -0.45, -0.9, -0.5, 0.6], [0, -0.3, -1.1, -0.3, 1.8], [-0.35, -0.55, -0.7, -0.7, 0],
+      CLEAR,
+      { pose: [0.15, -1.06, -1.52, 1.88, 0], dip: UNDER_DIP },
+      { pose: [-0.15, -1.06, -1.52, 1.88, 0], dip: UNDER_DIP },
+      CLEAR,
     ],
   },
   {
-    at: [0.4, ROOM.height - 0.6, -9], flip: true, timing: { hold: 1.4, speed: 0.8, offset: 4.4 },
+    at: [0.4, ROOM.height - 0.6, -9], flip: true, timing: { hold: 0.8, strokes: 3, speed: 0.5, offset: 4.4 },
     poses: [
       [0, -0.35, -0.7, -0.5, 0], [0.4, -0.2, -0.9, -0.3, 1.2],
       [-0.3, -0.5, -0.5, -0.6, -0.8],

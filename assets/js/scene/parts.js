@@ -70,6 +70,61 @@ export const hose = (points, radius, material, cast = false) => {
   return mesh(tube(curve, Math.max(24, points.length * 14), radius), material, { cast });
 };
 
+/**
+ * Secondary motion for a hose pinned at both ends to one moving link: its middle rides a damped
+ * spring, so it lags each hard start, swings past on the stop and settles. Thicker hoses are stiffer.
+ */
+export const createFlop = (hoseMesh, { damping = 0.16, limit = 0.1 } = {}) => {
+  const { geometry } = hoseMesh;
+  const { path, radius, tubularSegments, radialSegments } = geometry.parameters;
+  const stiffness = 100 + 3000 * radius;
+  const friction = 2 * damping * Math.sqrt(stiffness);
+  const position = geometry.attributes.position;
+  const rest = position.array.slice();
+  const ring = radialSegments + 1;
+  const weight = Array.from({ length: position.count }, (_, i) => Math.sin(Math.PI * Math.floor(i / ring) / tubularSegments));
+  geometry.computeBoundingSphere();
+  geometry.boundingSphere.radius += limit;
+
+  const mid = path.getPoint(0.5);
+  const anchor = new Vector3();
+  const anchorVel = new Vector3();
+  const last = new Vector3();
+  const p = new Vector3();
+  const v = new Vector3();
+  const pull = new Vector3();
+  const offset = new Vector3();
+  let primed = false;
+
+  return (dt) => {
+    hoseMesh.localToWorld(anchor.copy(mid));
+    if (!primed) {
+      p.copy(anchor);
+      last.copy(anchor);
+      primed = true;
+    }
+    if (dt <= 0) return;
+
+    anchorVel.subVectors(anchor, last).divideScalar(dt);
+    last.copy(anchor);
+    pull.subVectors(anchor, p).multiplyScalar(stiffness)
+      .addScaledVector(v, -friction).addScaledVector(anchorVel, friction);
+    v.addScaledVector(pull, dt);
+    p.addScaledVector(v, dt);
+    offset.subVectors(p, anchor).clampLength(0, limit);
+    p.addVectors(anchor, offset);
+
+    hoseMesh.worldToLocal(offset.copy(p)).sub(mid);
+    const a = position.array;
+    for (let i = 0; i < position.count; i += 1) {
+      a[i * 3] = rest[i * 3] + offset.x * weight[i];
+      a[i * 3 + 1] = rest[i * 3 + 1] + offset.y * weight[i];
+      a[i * 3 + 2] = rest[i * 3 + 2] + offset.z * weight[i];
+    }
+    position.needsUpdate = true;
+  };
+};
+
 // Sagging cable between two points; `sag` drops the middle, `sway` pushes it sideways.
 export const droop = (a, b, sag, sway, radius, material, cast = false) => {
   const mid = a.clone().lerp(b, 0.5).add(sway);
