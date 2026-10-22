@@ -8,7 +8,7 @@ const GradeShader = {
   uniforms: {
     tDiffuse: { value: null },
     uTint: { value: new Vector3() },
-    uLift: { value: 0.16 },
+    uLift: { value: 0.07 },
     uVignette: { value: 0.38 },
     uAberration: { value: 0.0065 },
     uGrain: { value: 0.045 },
@@ -41,10 +41,25 @@ const GradeShader = {
       );
       col = mix(col, uTint, uLift);
       col *= 1.0 - uVignette * smoothstep(0.08, 0.5, r2);
-      col += (hash(gl_FragCoord.xy + fract(uTime) * 917.0) - 0.5) * uGrain;
+      float luma = dot(col, vec3(0.2126, 0.7152, 0.0722));
+      col += (hash(gl_FragCoord.xy + fract(uTime) * 917.0) - 0.5) * uGrain * mix(1.0, 0.35, luma);
       gl_FragColor = vec4(col, 1.0);
     }
   `,
+};
+
+// Metres either side of the focus plane kept fully sharp: covers the orb, all three arms and their floor zones.
+const FOCUS_RANGE = 3;
+
+// Stock BokehPass blurs from the focus plane outward with no sharp zone; carve one out.
+const withFocusRange = (pass, range) => {
+  const material = pass.materialBokeh;
+  const blur = /float factor = \( focus \+ viewZ \);[^\n]*/;
+  if (!blur.test(material.fragmentShader)) return;
+  pass.uniforms.focusRange = { value: range };
+  material.fragmentShader = `uniform float focusRange;\n${material.fragmentShader.replace(blur,
+    'float factor = focus + viewZ;\n\t\t\tfactor = sign( factor ) * max( abs( factor ) - focusRange, 0.0 );')}`;
+  material.needsUpdate = true;
 };
 
 /**
@@ -67,7 +82,8 @@ export const createPost = (renderer, scene, camera, { tier, tint }) => {
   composer.addPass(new UnrealBloomPass(size.clone(), 0.32, 0.6, 0.95));
 
   if (tier === 'high') {
-    bokeh = new BokehPass(scene, camera, { focus: 12, aperture: 0.002, maxblur: 0.0068 });
+    bokeh = new BokehPass(scene, camera, { focus: 12, aperture: 0.0016, maxblur: 0.0054 });
+    withFocusRange(bokeh, FOCUS_RANGE);
     composer.addPass(bokeh);
   }
 

@@ -8,8 +8,8 @@ import { createCore } from './core.js';
 import { createEquipment } from './equipment.js';
 import { createMarkings } from './markings.js';
 import { createDust } from './dust.js';
-import { createMaterials } from './materials.js';
-import { at, block, hose, mesh, plate } from './parts.js';
+import { createMaterials, kelvin } from './materials.js';
+import { at, block, hose, mesh, plate, rng } from './parts.js';
 
 export const ROOM = { width: 11, height: 5.2, length: 46, near: 9 };
 export const CELL = new Vector3(0, 1.65, -6);
@@ -18,6 +18,12 @@ const BAY = 6;
 const far = ROOM.near - ROOM.length;
 const midZ = (ROOM.near + far) / 2;
 const still = { cast: false };
+
+// Ceiling fixtures: cold blue-white, each tube up to a thousand kelvin off the mean.
+// Seeded by position, so an area light and the panel it sits under always agree.
+const CEILING_K = 10000;
+const K_SPREAD = 1000;
+const fixtureK = (x, z) => CEILING_K + (rng(Math.round(x * 10) * 7919 + Math.round(z * 10) * 104729)() * 2 - 1) * K_SPREAD;
 
 const shell = (m) => {
   const { width: w, height: h, length: l } = ROOM;
@@ -47,35 +53,39 @@ const bays = (m) => {
     );
     [-2.4, 2.4].forEach((x) => objects.push(
       at(mesh(housing, m.housing, still), x, h - 0.03, z - BAY / 2),
-      at(mesh(panel, m.light, still), x, h - 0.07, z - BAY / 2),
+      at(mesh(panel, m.fixture(fixtureK(x, z - BAY / 2), 3.2), still), x, h - 0.07, z - BAY / 2),
     ));
     // Beam-mounted pairs beyond the orb, bright enough to read through the haze.
     if (z < CELL.z - 3) {
       [-2.4, 2.4].forEach((x) => objects.push(
         at(mesh(beamHousing, m.housing, still), x, h - 0.64, z),
-        at(mesh(beamPanel, m.beamLight, still), x, h - 0.69, z),
+        at(mesh(beamPanel, m.fixture(fixtureK(x, z), 8), still), x, h - 0.69, z),
       ));
     }
   }
 
   const kick = new BoxGeometry(0.04, 0.03, ROOM.length);
-  [-1, 1].forEach((side) => objects.push(at(mesh(kick, m.light, still), side * (w / 2 - 0.02), 0.22, midZ)));
+  [-1, 1].forEach((side) => {
+    const x = side * (w / 2 - 0.02);
+    objects.push(at(mesh(kick, m.fixture(fixtureK(x, midZ), 3.2), still), x, 0.22, midZ));
+  });
   return objects;
 };
 
 const lights = () => {
   const { height: h } = ROOM;
-  const hemi = new HemisphereLight(0xfffdfa, 0x8f8c84, 0.38);
+  const hemi = new HemisphereLight(0xfffdfa, 0x8f8c84, 0.12);
 
   const rects = [CELL.z + BAY / 2, CELL.z - BAY / 2].flatMap((z) => [-2.4, 2.4].map((x) => {
-    const rect = new RectAreaLight(0xfffcf7, 3, 2.6, 1.4);
+    const rect = new RectAreaLight(kelvin(fixtureK(x, z)), 3, 2.6, 1.4);
     rect.position.set(x, h - 0.1, z);
     rect.lookAt(x, 0, z);
     return rect;
   }));
 
-  const key = new SpotLight(0xfffaf2, 34, 12, 0.62, 0.85, 2);
-  key.position.set(0.6, h - 0.15, CELL.z + 0.4);
+  const keyAt = [0.6, h - 0.15, CELL.z + 0.4];
+  const key = new SpotLight(kelvin(fixtureK(keyAt[0], keyAt[2])), 34, 12, 0.62, 0.85, 2);
+  key.position.set(...keyAt);
   key.target.position.copy(CELL).setY(0);
   key.castShadow = true;
   key.shadow.bias = -0.0004;

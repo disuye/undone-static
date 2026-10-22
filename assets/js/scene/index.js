@@ -14,6 +14,7 @@ const TIERS = {
 
 // Filmic cadence: 30fps divides 60/120Hz evenly (24 judders on 60Hz panels) and halves GPU work.
 const FPS = 30;
+const ENV_PROBE = new Vector3(0, 2.2, -2);
 const STEP = 1 / FPS;
 
 const canvas = document.querySelector('[data-is="scene"]');
@@ -50,15 +51,20 @@ const createScene = (renderer, tint, tier) => {
   scene.background = fog;
   scene.fog = new FogExp2(fog, 0.042);
 
+  // Generic room first (one bounce), then a one-off capture of the lab itself so reflections match it.
   const pmrem = new PMREMGenerator(renderer);
-  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-  scene.environmentIntensity = 0.45;
-  pmrem.dispose();
+  const seed = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  scene.environment = seed;
 
   RectAreaLightUniformsLib.init();
   const lab = buildLab({ dustCount: TIERS[tier].dust, coreShadows: TIERS[tier].coreShadows });
   lab.group.traverse((o) => { if (o.isSpotLight) o.shadow.mapSize.setScalar(TIERS[tier].shadowMap); });
   scene.add(lab.group);
+
+  scene.environment = pmrem.fromScene(scene, 0.04, 0.1, 60, { position: ENV_PROBE }).texture;
+  scene.environmentIntensity = 0.7;
+  seed.dispose();
+  pmrem.dispose();
   return { scene, lab };
 };
 

@@ -1,6 +1,6 @@
 import {
   AdditiveBlending, BackSide, CanvasTexture, Color, DoubleSide, MeshBasicMaterial, MeshPhysicalMaterial, MeshStandardMaterial,
-  RepeatWrapping, SRGBColorSpace,
+  RepeatWrapping, SRGBColorSpace, Vector2,
 } from '../vendor/three.module.js';
 import { rng } from './parts.js';
 
@@ -8,7 +8,7 @@ import { rng } from './parts.js';
 const canvasTexture = (size, draw, srgb) => {
   const canvas = document.createElement('canvas');
   canvas.width = canvas.height = size;
-  draw(canvas.getContext('2d'), size);
+  draw(canvas.getContext('2d', { willReadFrequently: true }), size);
   const texture = new CanvasTexture(canvas);
   texture.wrapS = texture.wrapT = RepeatWrapping;
   texture.anisotropy = 8;
@@ -27,29 +27,90 @@ const speckle = (ctx, size, amount) => {
   ctx.putImageData(img, 0, 0);
 };
 
+// Tangent-space normal map from a drawn canvas's luminance: darker reads as recessed.
+const normalFrom = (texture, strength = 3) => {
+  const { width: w, height: h } = texture.image;
+  const src = texture.image.getContext('2d').getImageData(0, 0, w, h).data;
+  const lum = (x, y) => src[(((y + h) % h) * w + ((x + w) % w)) * 4] / 255;
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  const out = ctx.createImageData(w, h);
+  for (let y = 0; y < h; y += 1) {
+    for (let x = 0; x < w; x += 1) {
+      const nx = (lum(x - 1, y) - lum(x + 1, y)) * strength;
+      const ny = (lum(x, y + 1) - lum(x, y - 1)) * strength;
+      const len = Math.hypot(nx, ny, 1);
+      out.data.set([(nx / len + 1) * 127.5, (ny / len + 1) * 127.5, (1 / len + 1) * 127.5, 255], (y * w + x) * 4);
+    }
+  }
+  ctx.putImageData(out, 0, 0);
+  const normal = new CanvasTexture(canvas);
+  normal.wrapS = normal.wrapT = RepeatWrapping;
+  normal.anisotropy = texture.anisotropy;
+  normal.repeat.copy(texture.repeat);
+  return normal;
+};
+
 // One tile/panel: flat fill, inset bevel line, dark seam on the edge.
-const panel = (base, seam, inset) => (ctx, size) => {
+const tile = (ctx, x, y, s, [base, seam, inset]) => {
   ctx.fillStyle = base;
-  ctx.fillRect(0, 0, size, size);
+  ctx.fillRect(x, y, s, s);
   ctx.strokeStyle = inset;
-  ctx.lineWidth = size * 0.004;
-  ctx.strokeRect(size * 0.06, size * 0.06, size * 0.88, size * 0.88);
+  ctx.lineWidth = s * 0.004;
+  ctx.strokeRect(x + s * 0.06, y + s * 0.06, s * 0.88, s * 0.88);
   ctx.strokeStyle = seam;
-  ctx.lineWidth = size * 0.012;
-  ctx.strokeRect(0, 0, size, size);
+  ctx.lineWidth = s * 0.012;
+  ctx.strokeRect(x, y, s, s);
+};
+
+// A grid of tiles per texture, so large-scale wear (polished walkways, scuffs) doesn't repeat every tile.
+const SHEET = 4;
+const panelSheet = (tones, wear) => (ctx, size) => {
+  const s = size / SHEET;
+  for (let i = 0; i < SHEET * SHEET; i += 1) tile(ctx, (i % SHEET) * s, Math.floor(i / SHEET) * s, s, tones);
+  if (wear) {
+    const r = rng(19);
+    for (let i = 0; i < 40; i += 1) {
+      const x = r() * size;
+      const y = r() * size;
+      const rad = size * (0.05 + r() * 0.2);
+      const g = ctx.createRadialGradient(x, y, 0, x, y, rad);
+      g.addColorStop(0, wear(0.08 + r() * 0.22));
+      g.addColorStop(1, wear(0));
+      ctx.fillStyle = g;
+      ctx.fillRect(x - rad, y - rad, rad * 2, rad * 2);
+    }
+  }
   speckle(ctx, size, 10);
 };
 
-const panelMaps = (repeatX, repeatY, tones) => {
-  const map = canvasTexture(512, panel(...tones.colour), true);
-  const roughnessMap = canvasTexture(512, panel(...tones.roughness), false);
-  [map, roughnessMap].forEach((t) => t.repeat.set(repeatX, repeatY));
-  return { map, roughnessMap };
+// Drawn once; each surface gets clones (shared image, own repeat).
+const panelSet = (tones) => {
+  const map = canvasTexture(1024, panelSheet(tones.colour), true);
+  return {
+    map,
+    normalMap: normalFrom(map),
+    roughnessMap: canvasTexture(1024, panelSheet(tones.roughness), false),
+    worn: canvasTexture(1024, panelSheet(tones.roughness, tones.wear), false),
+  };
+};
+
+const panelMaps = (set, repeatX, repeatY, { worn = false } = {}) => {
+  const maps = {
+    map: set.map.clone(),
+    normalMap: set.normalMap.clone(),
+    roughnessMap: (worn ? set.worn : set.roughnessMap).clone(),
+  };
+  Object.values(maps).forEach((t) => t.repeat.set(repeatX / SHEET, repeatY / SHEET));
+  return { ...maps, normalScale: new Vector2(0.5, 0.5) };
 };
 
 const SURFACE = {
   colour: ['#e4e1da', '#a29f97', '#d6d3cc'],
   roughness: ['#8a8a8a', '#ffffff', '#b0b0b0'],
+  wear: (a) => `rgba(20,20,20,${a})`,
 };
 
 /**
@@ -118,10 +179,15 @@ const ARMOUR = {
   },
 };
 
-const armourMaps = () => ({
-  map: canvasTexture(1024, weathering(ARMOUR.colour), true),
-  roughnessMap: canvasTexture(1024, weathering(ARMOUR.roughness), false),
-});
+const armourMaps = () => {
+  const map = canvasTexture(1024, weathering(ARMOUR.colour), true);
+  return {
+    map,
+    roughnessMap: canvasTexture(1024, weathering(ARMOUR.roughness), false),
+    normalMap: normalFrom(map, 2),
+    normalScale: new Vector2(0.4, 0.4),
+  };
+};
 
 // Painted floor marking: hazard-striped border, inner line, scuffed paint.
 export const hazardTexture = ({ dashed = false } = {}) => canvasTexture(1024, (ctx, size) => {
@@ -177,6 +243,17 @@ export const dustSprite = () => canvasTexture(64, (ctx, size) => {
   ctx.fillRect(0, 0, size, size);
 }, true);
 
+// Black-body colour (Tanner Helland fit, 1000–40000 K), normalised to full brightness.
+export const kelvin = (k) => {
+  const t = k / 100;
+  const r = t <= 66 ? 255 : 329.698727446 * (t - 60) ** -0.1332047592;
+  const g = t <= 66 ? 99.4708025861 * Math.log(t) - 161.1195681661 : 288.1221695283 * (t - 60) ** -0.0755148492;
+  const b = t >= 66 ? 255 : t <= 19 ? 0 : 138.5177312231 * Math.log(t - 10) - 305.0447927307;
+  const rgb = [r, g, b].map((v) => Math.min(Math.max(v, 0), 255));
+  const peak = Math.max(...rgb);
+  return new Color().setRGB(...rgb.map((v) => v / peak), SRGBColorSpace);
+};
+
 const emissive = (hex, intensity) => new MeshBasicMaterial({
   color: new Color(hex).multiplyScalar(intensity),
 });
@@ -190,22 +267,23 @@ const rubber = (color) => new MeshStandardMaterial({ color, roughness: 0.62 });
 
 export const createMaterials = (room) => {
   const worn = armourMaps();
+  const panels = panelSet(SURFACE);
   return {
     floor: new MeshStandardMaterial({
-      ...panelMaps(room.width / 1.2, room.length / 1.2, SURFACE),
+      ...panelMaps(panels, room.width / 1.2, room.length / 1.2, { worn: true }),
       color: 0xb4b0a7, roughness: 0.32,
     }),
     wall: new MeshStandardMaterial({
-      ...panelMaps(room.length / 1.6, room.height / 2.6, SURFACE),
+      ...panelMaps(panels, room.length / 1.6, room.height / 2.6),
       color: 0xb3afa7, roughness: 0.8,
     }),
     ceiling: new MeshStandardMaterial({
-      ...panelMaps(room.width / 2, room.length / 2, SURFACE),
+      ...panelMaps(panels, room.width / 2, room.length / 2),
       color: 0x9d9a93, roughness: 0.9,
     }),
     frame: new MeshStandardMaterial({ color: 0x9f9c94, roughness: 0.55 }),
-    armour: new MeshPhysicalMaterial({ ...worn, color: 0xffffff, clearcoat: 0.35, clearcoatRoughness: 0.35 }),
-    armourGrey: new MeshPhysicalMaterial({ ...worn, color: 0xd2cfc8, clearcoat: 0.2, clearcoatRoughness: 0.4 }),
+    armour: new MeshPhysicalMaterial({ ...worn, color: 0xffffff, clearcoat: 0.15, clearcoatRoughness: 0.4 }),
+    armourGrey: new MeshPhysicalMaterial({ ...worn, color: 0xd2cfc8, clearcoat: 0.1, clearcoatRoughness: 0.45 }),
     mech: new MeshStandardMaterial({ color: 0x8b8880, roughness: 0.5, metalness: 0.55 }),
     shell: new MeshPhysicalMaterial({ color: 0xf4f2ed, roughness: 0.22, clearcoat: 1, clearcoatRoughness: 0.08 }),
     liner: new MeshStandardMaterial({ color: 0x2f2d2a, roughness: 0.7, metalness: 0.3, side: BackSide }),
@@ -218,7 +296,7 @@ export const createMaterials = (room) => {
     screen: emissive(0xcfe0e4, 0.9),
     panel: emissive(0xfff9f0, 1.6),
     light: emissive(0xfffcf8, 3.2),
-    beamLight: emissive(0xfffcf8, 8),
+    fixture: (k, intensity) => emissive(kelvin(k), intensity),
     glow: emissive(0xfff8ef, 2.4),
     neon: emissive(0xfdfd0d, 1.4),
   };
