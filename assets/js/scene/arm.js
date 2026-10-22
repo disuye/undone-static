@@ -30,6 +30,19 @@ const PROFILE = {
   junction: [[0, 0], [0.34, 0], [0.3, 0.22], [0.05, 0.26]],
 };
 
+// Rated joint speeds (rad/s): heavy base axes are slowest, wrist and tool flange quickest.
+const JOINT_SPEED = [0.6, 0.5, 0.65, 1.4, 2.8];
+
+// Tool-engage offset from each station pose: lean in, tip the wrist, twist the tool.
+const DIP = [0, -0.05, -0.12, -0.1, 0.9];
+
+// Each station: approach, pause, plunge in and work, retract, then on to the next.
+const workCycle = (poses, dip, hold) => poses.flatMap((pose) => [
+  { pose, hold: 0.3 },
+  { pose: pose.map((a, j) => a + dip[j]), hold },
+  { pose, hold: 0.35 },
+]);
+
 /**
  * Six-axis prototype arm, built pointing up local +y, reaching toward local +x.
  * Pose = [yaw, shoulder, elbow, wrist, roll] in radians; negative pitch leans forward.
@@ -79,7 +92,10 @@ export const createArm = (m, poses, timing) => {
     at(prism(0.03, 0.02, 12, m.glow), 0, 0.12, -0.03));
 
   const ram = createPiston(root, ramBase, ramHead, m.armourGrey, m.steel);
-  const sequence = createSequencer(poses, timing);
+  const { hold = 1, speed = 1, dip = DIP, offset = 0 } = timing;
+  const sequence = createSequencer(workCycle(poses, dip, hold), {
+    speeds: JOINT_SPEED.map((v) => v * speed), offset,
+  });
   const pose = new Array(5).fill(0);
 
   const update = (time) => {

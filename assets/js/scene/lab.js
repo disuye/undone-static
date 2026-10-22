@@ -87,21 +87,21 @@ const lights = () => {
 // Arm placements relative to the work cell; poses lean in toward the core.
 const ARMS = [
   {
-    at: [-2.7, 0, -5.2], flip: false, timing: { move: 2.8, hold: 1.6, offset: 0 },
+    at: [-2.7, 0, -5.2], flip: false, timing: { hold: 1.1, offset: 0 },
     poses: [
       [0.1, -0.5, -0.8, -0.6, 0], [-0.25, -0.35, -1.05, -0.4, 1.4],
       [0.3, -0.6, -0.6, -0.9, 0.4], [0, -0.2, -1.2, -0.2, -1],
     ],
   },
   {
-    at: [2.8, 0, -6.9], flip: false, timing: { move: 3.2, hold: 1.2, offset: 2.1 },
+    at: [2.8, 0, -6.9], flip: false, timing: { hold: 0.8, offset: 2.1, dip: [0, -0.06, -0.1, -0.12, -1.1] },
     poses: [
       [-0.2, -0.45, -0.9, -0.5, 0.6], [0.2, -0.65, -0.5, -0.8, -0.6],
       [0, -0.3, -1.1, -0.3, 1.8], [-0.35, -0.55, -0.7, -0.7, 0],
     ],
   },
   {
-    at: [0.4, ROOM.height - 0.6, -9], flip: true, timing: { move: 3.6, hold: 2, offset: 4.4 },
+    at: [0.4, ROOM.height - 0.6, -9], flip: true, timing: { hold: 1.4, speed: 0.8, offset: 4.4 },
     poses: [
       [0, -0.35, -0.7, -0.5, 0], [0.4, -0.2, -0.9, -0.3, 1.2],
       [-0.3, -0.5, -0.5, -0.6, -0.8],
