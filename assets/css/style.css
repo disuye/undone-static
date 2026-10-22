@@ -743,8 +743,12 @@ textarea {
 
 [data-is="newsletter"] button {
 	flex: none;
+	--x: transparent calc(50% - var(--hairline) / 2), currentColor 0 calc(50% + var(--hairline) / 2), transparent 0;
 	padding: var(--space-2xs) var(--space-s);
-	background: var(--paper);
+	background:
+		linear-gradient(to top right, var(--x)),
+		linear-gradient(to bottom right, var(--x)),
+		var(--paper);
 	color: var(--ink);
 }
 
