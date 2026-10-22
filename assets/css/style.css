@@ -596,6 +596,17 @@ main > [data-is="spec"] {
 	letter-spacing: var(--track-tight);
 }
 
+/* TEMP: launch banner inside splash — remove with the banner */
+[data-is="splash"]:has(> [data-is="banner"]) {
+	grid-template-columns: 100%;
+}
+
+[data-is="splash"] > [data-is="banner"] {
+	justify-self: stretch;
+	margin-inline: 0;
+	text-align: start;
+}
+
 [data-is="cta"] {
 	padding: var(--space-2xs) var(--space-s);
 	background: var(--ink);
