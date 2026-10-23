@@ -73,7 +73,9 @@ const createScene = (renderer, tint, tier) => {
 };
 
 // Pointer parallax, metres either side: ±0.9 m sideways ≈ 1.5 floor tiles (1.2 m) edge to edge.
-const PARALLAX = { x: 0.9, y: 0.12, lookX: 0.35 };
+// Camera height spans 0.8–3 m; aiming at orb height keeps the view near level, so floor and ceiling share the frame.
+const PARALLAX = { x: 0.9, y: 1.1, look: 0.35 };
+const EYE_HEIGHT = 1.9;
 
 // Camera dollies down the hall with page scroll; pointer adds parallax.
 const createRig = (camera) => {
@@ -92,8 +94,8 @@ const createRig = (camera) => {
     now.x = damp(now.x, goal.x, 2, dt);
     now.y = damp(now.y, goal.y, 2, dt);
     const drift = Math.sin(time * 0.05) * 0.25;
-    camera.position.set(drift + now.x * PARALLAX.x, 2.6 - now.p * 0.5 - now.y * PARALLAX.y, 8.5 - now.p * 9);
-    look.set(now.x * PARALLAX.lookX, 0.85 + now.p * 0.4, CELL.z - 1 - now.p * 4);
+    camera.position.set(drift + now.x * PARALLAX.x, EYE_HEIGHT - now.y * PARALLAX.y, 8.5 - now.p * 9);
+    look.set(now.x * PARALLAX.look, CELL.y - now.y * PARALLAX.look, CELL.z - 1 - now.p * 4);
     camera.lookAt(look);
     return camera.position.distanceTo(CELL);
   };
