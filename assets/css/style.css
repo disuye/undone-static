@@ -509,6 +509,10 @@ article > p:not([data-is]) {
 	max-inline-size: var(--measure);
 }
 
+main > [data-is="card"] {
+	max-inline-size: calc(var(--measure) + 2 * var(--space-m));
+}
+
 article figure img,
 [data-is="photo"] img {
 	inline-size: 100%;
@@ -559,6 +563,10 @@ main > [data-is="spec"] {
 	border-color: var(--ink);
 }
 
+[data-is="spec"] h4 {
+	font-size: var(--step-0);
+}
+
 [data-is="spec"] [role="list"] {
 	display: grid;
 	border-block-start: var(--hairline) solid var(--rule-ink);
@@ -567,6 +575,7 @@ main > [data-is="spec"] {
 [data-is="spec"] [role="listitem"] {
 	display: flex;
 	justify-content: space-between;
+	text-transform: capitalize;
 	gap: var(--space-s);
 	padding-block: var(--space-2xs);
 	border-block-end: var(--hairline) solid var(--rule-ink);

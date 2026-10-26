@@ -1,3 +1,6 @@
 .DS_Store
 .vscode
 _construction/
+index-content.html
+assets/media/
+*.mp4
