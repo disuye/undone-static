@@ -26,9 +26,11 @@ const copyEmail = (link) => {
   });
 };
 
+// Grow-only --vh-lock is for touch browsers (collapsing URL bar); desktop windows re-measure on every resize.
 const lockViewportHeight = () => {
   const root = document.documentElement.style;
   const portrait = matchMedia('(orientation: portrait)');
+  const touch = matchMedia('(pointer: coarse)');
   let height;
 
   const set = (name, px) => root.setProperty(name, `${px}px`);
@@ -49,8 +51,17 @@ const lockViewportHeight = () => {
     measure();
     addEventListener('resize', measure, { once: true });
   });
-  addEventListener('resize', grow, { passive: true });
+  addEventListener('resize', () => (touch.matches ? grow() : measure()), { passive: true });
   measure();
+};
+
+// Moving a window to a screen with a different pixel ratio doesn't reliably fire 'resize'; re-dispatch it
+// so every resize listener (scene buffer, CRT mask, viewport tokens) picks up the new devicePixelRatio.
+const watchPixelRatio = () => {
+  matchMedia(`(resolution: ${devicePixelRatio}dppx)`).addEventListener('change', () => {
+    dispatchEvent(new Event('resize'));
+    watchPixelRatio();
+  }, { once: true });
 };
 
 const fitHeadline = (headline) => {
@@ -148,3 +159,4 @@ document.querySelectorAll('a[data-u][data-d]:not([data-copy])').forEach(revealMa
 document.querySelectorAll('a[data-u][data-d][data-copy]').forEach(copyEmail);
 document.querySelectorAll('[data-is="split-headline"]').forEach(fitHeadline);
 lockViewportHeight();
+watchPixelRatio();
