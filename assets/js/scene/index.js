@@ -122,9 +122,13 @@ const boot = () => {
     camera.updateProjectionMatrix();
   };
 
+  let lastZ = null;
   const draw = (time, dt) => {
     lab.update(time);
-    post.render(time, rig(time, dt));
+    const focus = rig(time, dt);
+    const speed = lastZ === null ? 0 : Math.abs(camera.position.z - lastZ) / dt;   // dolly m/s → scroll glitch
+    lastZ = camera.position.z;
+    post.render(time, focus, dt, speed);
   };
 
   // Drop post-processing to the cheaper tier once if rendered frames can't keep the cadence.
