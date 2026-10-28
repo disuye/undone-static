@@ -575,6 +575,7 @@ main > [data-is="spec"] {
 [data-is="spec"] [role="listitem"] {
 	display: flex;
 	justify-content: space-between;
+	align-items: baseline;
 	text-transform: capitalize;
 	gap: var(--space-s);
 	padding-block: var(--space-2xs);
@@ -587,8 +588,18 @@ main > [data-is="spec"] {
 	background-color: var(--neon);
 }
 
-[data-is="spec"] [role="listitem"] > p:last-child {
-	font-family: var(--font-mono);
+main {
+	counter-reset: numspec;
+}
+
+[data-is="spec"] [role="listitem"] {
+	counter-increment: numspec;
+}
+
+[data-is="spec"] [role="listitem"]::after {
+	content: "UNDN-" counter(numspec, decimal-leading-zero);
+	font: var(--step--2) / 1 var(--font-mono);
+	letter-spacing: var(--track-caps);
 }
 
 [data-is="banner"] {
