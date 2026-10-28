@@ -213,7 +213,7 @@ i {
 }
 
 /* Industrial label: Inter caps, tracked */
-:is([data-is="meta"], [data-is="cta"], [data-is="menu-button"], [data-is="scroll-cue"], h4, [data-is="footer"] a, [data-is="newsletter"] button) {
+:is([data-is="meta"], [data-is="cta"], [data-is="menu-button"], [data-is="scroll-cue"], h4, [data-is="footer"] a, [data-is="newsletter"] button, [data-is="icon-contact"]) {
 	font: 500 var(--step--2) / var(--leading) var(--font-body);
 	text-transform: uppercase;
 	letter-spacing: var(--track-caps);
@@ -224,7 +224,7 @@ i {
 	opacity: 0.7;
 }
 
-[data-is="cta"] {
+:is([data-is="cta"], [data-is="icon-contact"]) {
 	display: inline-flex;
 	align-items: center;
 	gap: var(--space-2xs);
@@ -232,7 +232,7 @@ i {
 	font-weight: 700;
 }
 
-[data-is="cta"]::after {
+:is([data-is="cta"], [data-is="icon-contact"])::after {
 	content: "";
 	inline-size: var(--icon);
 	aspect-ratio: 1;
@@ -241,7 +241,7 @@ i {
 	transition: translate var(--t-slow) var(--ease-spring);
 }
 
-[data-is="cta"]:hover::after {
+:is([data-is="cta"], [data-is="icon-contact"]):hover::after {
 	translate: var(--space-3xs) 0;
 }
 
@@ -582,6 +582,7 @@ main > [data-is="spec"] {
 	padding-block: var(--space-2xs);
 	border-block-end: var(--hairline) solid var(--rule-ink);
 	font-size: var(--step--1);
+	counter-increment: numspec;
 	transition: background-color var(--t-fast) var(--ease);
 }
 
@@ -593,14 +594,16 @@ main {
 	counter-reset: numspec;
 }
 
-[data-is="spec"] [role="listitem"] {
-	counter-increment: numspec;
-}
-
-[data-is="spec"] [role="listitem"]::after {
-	content: "UNDN-" counter(numspec, decimal-leading-zero);
+/* A row's own code (CMS: row.code) replaces the ornamental counter. */
+[data-is="spec"] [role="listitem"] > [data-is="meta"],
+[data-is="spec"] [role="listitem"]:not(:has(> [data-is="meta"]))::after {
 	font: var(--step--2) / 1 var(--font-mono);
 	letter-spacing: var(--track-caps);
+	opacity: 1;
+}
+
+[data-is="spec"] [role="listitem"]:not(:has(> [data-is="meta"]))::after {
+	content: "UNDN-" counter(numspec, decimal-leading-zero);
 }
 
 [data-is="banner"] {
@@ -664,25 +667,15 @@ main {
 }
 
 textarea {
+	min-block-size: 4rem;
 	resize: vertical;
 }
 
 [data-is="icon-contact"] {
 	flex: none;
-	inline-size: calc(var(--icon) * 2);
-	aspect-ratio: 1;
+	padding: var(--space-2xs) var(--space-s);
 	background: var(--neon);
 	color: var(--ink);
-}
-
-[data-is="icon-contact"]::after {
-	content: "";
-	display: block;
-	inline-size: var(--icon);
-	aspect-ratio: 1;
-	margin: auto;
-	background: currentColor;
-	mask: var(--icon-arrow) center / contain no-repeat;
 }
 
 [data-is="postscript"] {
