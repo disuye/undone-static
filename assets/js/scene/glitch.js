@@ -39,8 +39,8 @@ export const GLITCH = {
   snow: 0.12,             // noise inside torn bands
   flash: 0.55,            // blowout pulse at burst start
   stripes: 0.35,          // aperture stripes in highlights
-  scan: 0.2,              // scanline darkening
-  lineTint: [0.93, 1, 0.97],
+  scan: 1.0,              // scanline darkening
+  lineTint: [0.93, 0.93, 1.0],
   haloTint: [0.04, 0.32, 0.55],
   flashTint: [1, 0.84, 0.95],
 };

@@ -24,12 +24,15 @@ const ENV_PROBE = new Vector3(0, 2.2, -2);
 const canvas = document.querySelector('[data-is="scene"]');
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const lowSpec = navigator.hardwareConcurrency <= 2 || navigator.deviceMemory <= 2;
+const params = new URLSearchParams(location.search);
+const DEBUG = params.has('debug');   // test hooks: debug.js
 
 // Single source of truth for the ground colour: the CSS token.
 const pageTint = () => getComputedStyle(document.documentElement)
   .getPropertyValue('--warmgray-rgb').trim().split(/\s+/).map((v) => Number(v) / 255);
 
 const pickTier = () => {
+  if (DEBUG && TIERS[params.get('tier')]) return params.get('tier');
   const coarse = matchMedia('(pointer: coarse)').matches;
   return coarse || (navigator.hardwareConcurrency ?? 4) < 8 ? 'low' : 'high';
 };
@@ -122,13 +125,17 @@ const boot = () => {
     camera.updateProjectionMatrix();
   };
 
+  const hooks = {};   // filled by debug.js only
   let lastZ = null;
   const draw = (time, dt) => {
+    hooks.beforeFrame?.();
     lab.update(time);
     const focus = rig(time, dt);
+    hooks.afterRig?.();
     const speed = lastZ === null ? 0 : Math.abs(camera.position.z - lastZ) / dt;   // dolly m/s → scroll glitch
     lastZ = camera.position.z;
     post.render(time, focus, dt, speed);
+    hooks.afterFrame?.();
   };
 
   // Drop post-processing to the cheaper tier once if rendered frames can't keep the cadence.
@@ -168,9 +175,15 @@ const boot = () => {
 
   draw(6, 1);
   canvas.dataset.ready = '';
-  if (!reducedMotion) renderer.setAnimationLoop(frame);
+  const setLoop = (on) => renderer.setAnimationLoop(on ? frame : null);
+  if (!reducedMotion) setLoop(true);
+  if (DEBUG) {
+    import('./debug.js')
+      .then(({ attach }) => attach({ canvas, renderer, scene, camera, draw, hooks, setLoop, params, tier }))
+      .catch((e) => console.warn('debug hooks:', e.message));
+  }
 };
 
-if (canvas && !lowSpec) {
+if (canvas && (!lowSpec || DEBUG)) {
   try { boot(); } catch (error) { console.warn('scene disabled:', error.message); }
 }
