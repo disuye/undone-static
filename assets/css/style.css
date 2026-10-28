@@ -538,12 +538,13 @@ article figure img {
 }
 
 [data-is="quote"] {
+	container-type: inline-size;
 	color: var(--neon);
 	border-color: var(--neon);
 }
 
 [data-is="quote"] > p:first-child {
-	font: 900 var(--step-3) / var(--leading-tight) var(--font-display);
+	font: 900 min(var(--step-3), 16cqi) / var(--leading-tight) var(--font-display);
 	letter-spacing: var(--track-tight);
 	text-wrap: balance;
 }
