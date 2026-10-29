@@ -58,11 +58,12 @@ export const plate = (profile, depth, material, chamfer = 0.012) => {
 export const block = (w, h, d, material) => mesh(new BoxGeometry(w, h, d), material);
 
 // Faceted cylinder: few sides read as machined housings rather than soft plastic.
+// Axis is baked into the geometry so at() can still set the mesh rotation without undoing it.
 export const prism = (radius, length, sides, material, axis = 'y') => {
-  const m = mesh(new CylinderGeometry(radius, radius, length, sides), material);
-  if (axis === 'z') m.rotation.x = Math.PI / 2;
-  if (axis === 'x') m.rotation.z = Math.PI / 2;
-  return m;
+  const geometry = new CylinderGeometry(radius, radius, length, sides);
+  if (axis === 'z') geometry.rotateX(Math.PI / 2);
+  if (axis === 'x') geometry.rotateZ(Math.PI / 2);
+  return mesh(geometry, material);
 };
 
 export const hose = (points, radius, material, cast = false) => {
@@ -138,13 +139,14 @@ export const droop = (a, b, sag, sway, radius, material, cast = false) => {
 };
 
 /**
- * Hydraulic ram between two anchors in different joint groups: the barrel grows from `from`,
- * the rod from `to`, so it telescopes as the joint moves. Meshes live in `parent`.
+ * Hydraulic ram between two anchors in different joint groups: a fixed-length barrel from `from`,
+ * a fixed-length rod from `to`, so the rod slides in and out as the joint moves. Meshes live in `parent`.
+ * `lengths.barrel` must stay short of the shortest anchor span; barrel + rod must exceed the longest.
  */
-export const createPiston = (parent, from, to, barrelMat, rodMat) => {
-  const unitCylinder = (r) => new CylinderGeometry(r, r, 1, 8).translate(0, 0.5, 0);
-  const barrel = mesh(unitCylinder(0.045), barrelMat);
-  const rod = mesh(unitCylinder(0.02), rodMat);
+export const createPiston = (parent, from, to, barrelMat, rodMat, lengths) => {
+  const cylinder = (r, length) => new CylinderGeometry(r, r, length, 8).translate(0, length / 2, 0);
+  const barrel = mesh(cylinder(0.045, lengths.barrel), barrelMat);
+  const rod = mesh(cylinder(0.02, lengths.rod), rodMat);
   parent.add(barrel, rod);
 
   const a = new Vector3();
@@ -156,14 +158,10 @@ export const createPiston = (parent, from, to, barrelMat, rodMat) => {
   return () => {
     parent.worldToLocal(from.getWorldPosition(a));
     parent.worldToLocal(to.getWorldPosition(b));
-    dir.subVectors(b, a);
-    const length = dir.length();
-    dir.normalize();
+    dir.subVectors(b, a).normalize();
     barrel.position.copy(a);
     barrel.quaternion.copy(q.setFromUnitVectors(up, dir));
-    barrel.scale.y = length * 0.62;
     rod.position.copy(b);
     rod.quaternion.copy(q.setFromUnitVectors(up, dir.negate()));
-    rod.scale.y = length * 0.5;
   };
 };

@@ -429,6 +429,10 @@ nav > [data-is="undone-text-logo"] {
 /* ---------- Main grid ---------- */
 
 main {
+	opacity: 0;
+}
+
+main {
 	flex: 1;
 	display: grid;
 	align-content: start;
