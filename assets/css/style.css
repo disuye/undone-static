@@ -33,6 +33,7 @@
 
 	--orange: rgb(var(--orange-rgb));
 	--warmgray: rgb(var(--warmgray-rgb));
+	--punchcard: rgba(var(--orange-rgb) / 0.2);
 	--ink: rgb(var(--ink-rgb));
 	--ink-55: rgba(var(--ink-rgb) / 0.55);
 	--ink-15: rgba(var(--ink-rgb) / 0.15);
@@ -461,7 +462,7 @@ main > :is([data-is="divider"], [data-is="banner"]) {
 	main > :nth-child(4n+2 of :is(article, figure)) { grid-column: 8 / span 5; margin-block-start: var(--stagger); }
 	main > :nth-child(4n+3 of :is(article, figure)) { grid-column: 2 / span 6; }
 	main > :nth-child(4n+4 of :is(article, figure)) { grid-column: 9 / span 4; margin-block-start: var(--stagger); }
-	main > article[data-is="dialog"] { grid-column: 4 / span 8; margin-block-start: 0; }
+	main > [data-is="divider"] + :is(article, figure) { grid-column: 4 / span 8; margin-block-start: 0; }
 }
 
 /* ---------- Blocks ---------- */
@@ -513,16 +514,22 @@ main > [data-is="card"] {
 	max-inline-size: calc(var(--measure) + 2 * var(--space-m));
 }
 
-article figure img,
+article figure :is(img, video, iframe),
 [data-is="photo"] img {
+	display: block;
 	inline-size: 100%;
 	block-size: auto;
+}
+
+article figure img,
+[data-is="photo"] img {
 	filter: grayscale(1) contrast(1.15);
 }
 
-article figure img {
+article figure :is(img, video, iframe) {
 	aspect-ratio: 16 / 9;
 	object-fit: cover;
+	border: 0;
 }
 
 [data-is="photo"] {
@@ -544,9 +551,10 @@ article figure img {
 }
 
 [data-is="quote"] > p:first-child {
-	font: 900 min(var(--step-3), 16cqi) / var(--leading-tight) var(--font-display);
+	font: 900 min(var(--step-3), 11cqi) / var(--leading-tight) var(--font-display);
 	letter-spacing: var(--track-tight);
 	text-wrap: balance;
+	overflow-wrap: break-word;
 }
 
 [data-is="quote"] > p:first-child::before { content: "“"; }
@@ -566,6 +574,33 @@ main > [data-is="spec"] {
 
 [data-is="spec"] h4 {
 	font-size: var(--step-0);
+}
+
+/* Punch card: cut corner + printed character strip along the bottom edge */
+main > [data-is="spec"] {
+	clip-path: polygon(1.25rem 0, 100% 0, 100% 100%, 0 100%, 0 1.25rem);
+}
+
+/* Container on the meta line, not the card: card-level containment would reset the UNDN- counter */
+[data-is="spec"] > [data-is="meta"] {
+	container-type: inline-size;
+}
+
+/* --chars must match the content string length */
+[data-is="spec"] > [data-is="meta"]::after {
+	--chars: 73;
+	content: "ABCDEFGHIJKLMNOPQR/STUVWXYZ&–01234567899876543210–&,.@%*<#,$,+_)|>:;~?=!(";
+	display: block;
+	padding: var(--space-2xs) 0 0;
+	margin: var(--space-s) calc(-1 * var(--space-m)) calc(-1 * var(--space-m));
+	overflow: clip;
+	letter-spacing: max(0px, (100cqi + 2 * var(--space-m) - var(--chars) * 1ch) / (var(--chars) - 1));
+	text-transform: none;
+	white-space: nowrap;
+	font: var(--step--2) / 1 var(--font-mono);
+	border-block-start: var(--hairline) solid var(--rule-ink);
+	background-color: var(--punchcard);
+	color: var(--orange);
 }
 
 [data-is="spec"] [role="list"] {

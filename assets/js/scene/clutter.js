@@ -39,10 +39,11 @@ export const createClutter = (m, { room, cell, mounts }) => {
     objects.push(droop(a, b, 0.3 + r() * 1.1, new Vector3(jitter(0.5), 0, 0), 0.015 + r() * 0.02, cable()));
   }
 
-  // Feeds dropping from a tray to the floor and snaking to a target.
+  // Feeds dropping from a tray to the floor and snaking to a target. The vertical run falls behind
+  // the target so it never hangs through the arm working there.
   const drop = (target, cast) => {
     const x = pick(trays);
-    const top = trayPoint(x, target.z + jitter(3));
+    const top = trayPoint(x, target.z - 1.5 - r() * 1.5);
     const side = Math.sign(target.x - x) || 1;
     const pts = [
       top.toArray(),
