@@ -139,6 +139,10 @@ h1, h2, h3, h4, h5 {
 	letter-spacing: var(--track-tight);
 }
 
+/* Retain text for SEO but only show inline image */
+h1 { font-size: 0; }
+h1 i { font-size: var(--step-0); }
+
 a {
 	color: inherit;
 	transition: color var(--t-fast) var(--ease), opacity var(--t-fast) var(--ease);
