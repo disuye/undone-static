@@ -432,9 +432,9 @@ nav > [data-is="undone-text-logo"] {
 
 /* ---------- Main grid ---------- */
 
-main {
+/* main {
 	opacity: 0;
-}
+} */
 
 main {
 	flex: 1;
