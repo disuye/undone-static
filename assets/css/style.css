@@ -389,8 +389,12 @@ nav > [data-is="undone-text-logo"] {
 	text-decoration: none;
 }
 
+/* Mirrors the Menu button's position in the nav bar so Close sits directly over it */
 [data-is="nav-menu"] > button {
-	margin-block-start: auto;
+	position: absolute;
+	inset-block-start: calc(var(--pad-top) + var(--nav-h) / 2);
+	inset-inline-end: var(--pad-right);
+	translate: 0 -50%;
 	outline: var(--hairline) solid var(--rule);
 }
 
