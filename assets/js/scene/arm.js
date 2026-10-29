@@ -117,8 +117,9 @@ export const createArm = (m, poses, timing) => {
     at(prism(0.09, 0.06, 8, m.steel), 0, 0.03),
     at(plate(PROFILE.fingerLong, 0.05, m.armShellGrey), 0.03, 0.05, 0),
     at(plate(PROFILE.fingerShort, 0.05, m.armShellGrey), -0.03, 0.05, 0),
-    at(prism(0.045, 0.12, 6, m.mech, 'z'), 0, 0.07, 0.1),
-    at(prism(0.03, 0.02, 12, m.glow, 'z'), 0, 0.07, 0.165),
+    // Flashlight beside the fingers, pointing along the hand; lens just proud of its tip.
+    at(prism(0.045, 0.12, 6, m.mech), 0, 0.07, 0.1),
+    at(prism(0.03, 0.02, 12, m.glow), 0, 0.135, 0.1),
     at(prism(0.03, 0.02, 12, m.glow), 0, 0.12, -0.03));
 
   const ram = createPiston(root, ramBase, ramHead, m.armShellGrey, m.steel, RAM);
