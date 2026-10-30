@@ -769,7 +769,7 @@ textarea {
 	grid-template-columns: repeat(2, minmax(0, 1fr));
 	gap: var(--space-l) var(--gutter);
 	padding: var(--space-xl) var(--pad-right) calc(var(--space-l) + var(--pad-bottom)) var(--pad-left);
-	background: linear-gradient(transparent, var(--ink) var(--space-xl));
+	background: linear-gradient(transparent, var(--ink-55) var(--space-xl));
 }
 
 [data-is="footer"] > :is([data-is="large-logo"], form, [data-is="copyright"]) {
