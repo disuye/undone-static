@@ -71,26 +71,26 @@
 				 <button type="button" popovertarget="menu" data-is="menu-button">Menu</button>
 				<div popover id="menu" data-is="nav-menu">
 					<a href="#about">About</a>
-					<!-- <a href="#projects">Projects</a>
-					<a href="#services">Services</a> -->
+					<a href="#projects">Projects</a>
+					<a href="#services">Services</a>
 					<a href="#contact">Contact</a>
 					<button type="button" popovertarget="menu" popovertargetaction="hide" data-is="menu-button">Close</button>
-				</div>
+				</div> 
 			</nav>
 
 			<div data-is="splash">
 				<h1>Undone Limited<i data-is="undone-text-logo" role="img" aria-label="Undone"></i></h1>
 				<p>Creative R&amp;D · Hong Kong · <i lang="zh-Hant-HK">香港</i></p>
 				<a href="#contact" data-is="scroll-cue" aria-label="Scroll to Contact">↓</a>
-				<div data-is="banner" role="note">
-					<p>Full website launching 2027 · <i lang="zh-Hant-HK">網站正在建設中</i></p>
+				<!-- <div data-is="banner" role="note">
+					<p>New website launching 2027 · <i lang="zh-Hant-HK">網站正在建設中</i></p>
 					<a href="#contact" data-is="cta">Send us a brief</a>
-				</div>
+				</div> -->
 			</div>
 		</header>
 
 		<main id="content">
-
+<!-- SECTION -->						 
 			<div data-is="divider" id="about">
 				<h2>About</h2>
 			</div>
@@ -111,21 +111,138 @@
 				
 				<a href="#contact" data-is="cta">Send us a brief</a>
 			</article>
-			
 
+<!-- SECTION -->
+			<div data-is="divider" id="projects">
+			<h2>Projects</h2>
+			</div>
+
+			<article data-is="quote">
+			<p>Remove the friction between ideas and implementation.</p>
+			<p>- studio maxim</p>
+			</article>
+
+			<article data-is="card">
+			<p data-is="meta">SMPLR · Music · C++/Qt · FFmpeg</p>
+			<h3>Generative music streaming 24/7</h3>
+			<figure>
+				<video src="assets/media/smplr-web-demo.mp4" autoplay loop muted playsinline></video>
+			</figure>
+			<p data-is="standfirst">Blurring the lines between producer and consumer; artist and audience: The Infinite Album.</p>
+			<p>An artistic reaction to big tech ingestion &amp; AI slop output, experimental artist SMPLR pointed a sonic firehose directly at the internet.</p>
+			<p><b>Undone</b> worked with the artist turning shell scripts and theoretical ideas into a functional C++/Qt server based application.</p>
+			<p>SMPLR's self-named application 'SMPLR' creates and streams continuous, non-repeating, non-AI, algorithmically generated experimental ambient music 24/7... forever.</p>
+			<p>To date, SMPLR's 'The Infinite Album' contains 6000+ hours of unique experimental music, archived to YouTube in ~12 hour chunks.</p>
+			<p>Based on FFmpeg and other open source technologies, the app deterministically creates music from a sample library, generates an audio-visual broadcast, and handles live streaming via the YouTube API (along with Kick and formerly Twitch), recovery from dropouts and network faults... all without any human intervention.</p>
+			<a href="https://theinfinitealbum.com" data-is="cta">The Infinite Album</a>
+			<a href="https://www.youtube.com/@theinfinitealbum" data-is="cta">YouTube</a>
+			</article>
+
+			<article data-is="card">
+			<p data-is="meta">CFK Media · Web · Three.js · HTML/CSS</p>
+			<h3>Tokyo in the browser</h3>
+			<figure>
+				<video src="assets/media/cfk-web-demo.mp4" autoplay loop muted playsinline></video>
+			</figure>
+			<p data-is="standfirst">Film and documentary production company <a href="https://cfkmedia.com">CFK</a> came to us with a request for a unique landing page.</p>
+			<p>Based on location stills from a documentary filmed in Japan, <b>Undone</b> re-created a Tokyo street scene using browser-based procedural 3D technology.</p>
+			<p>Fast load times, device-dependent resolution, and completely flexible, even able to handle dynamic content.</p><p>Includes custom coded grain overlay based on actual photographic film, halation, bloom, aberration and other 'filmic' effects. Even a guest appearance from the mighty Godzilla, if you watch closely.</p>
+			<p><b>Undone</b> loves this type of challenge; technology solves a creative issue (websites are cookie cutter), the end result aligns perfectly with CFK's brand, and it makes users smile. </p>
+			<a href="https://cfkmedia.com" data-is="cta">cfkmedia.com</a>
+			</article>
+
+			<article data-is="card">
+			<p data-is="meta">Checkpoint · Audio · C++/Qt · CoreAudio</p>
+			<h3>Real-time audio analysis</h3>
+			<figure>
+				<video src="assets/media/checkpoint-demo.mp4" autoplay loop muted playsinline></video>
+			</figure>
+			<p data-is="standfirst">Lightweight, fully featured, professional audio analysis tools for macOS.</p>
+			<p><b>Undone</b> recently developed Checkpoint, a CPU/GPU efficient, minimalist yet highly customizable suite of audio analysis tools for macOS.</p>
+			<p>This is <em>not</em> another bloody plug-in! As an in-house tool, Checkpoint allows us to quicky A-B audio files played from different sources. Metric Halo's <em>SpectraFoo</em> was our previous 'go to' suite, but it no longer runs on current macOS. So we built Checkpoint.</p> 
+			<p>Featuring the usual suspects of Meter, Spectrogram and Spectrograph, Phase and Correlation plus Waveform, there is a strong emphasis on mid-side analysis, with a clever "catch-all sound" design which negates the need for manually assigning channel inputs: Play music, run app, win prizes.</p><p>Checkpoint is currently in closed beta but will be available here in good time.</p>
+			<a href="#contact" data-is="cta">Send us a brief</a>
+			</article>
+			
+			<div data-is="banner" role="note">
+				<p>Full website launching 2027 · <i lang="zh-Hant-HK">網站正在建設中</i></p>
+				<a href="#contact" data-is="cta">Send us a brief</a>
+			</div>
+
+			<!-- <figure data-is="photo">
+			<img src="assets/img/anon.jpg" width="800" height="800" alt="Long-exposure photograph of hands blurring across a mixing desk and turntable." loading="lazy" decoding="async">
+			<p>FIG. 01 — Session, Kwun Tong. 1/4s, ISO 3200.</p>
+			</figure> -->
+<!-- SECTION -->
+			<div data-is="divider" id="services">
+				<h2>Services</h2>
+			</div>
+
+			<article data-is="dialog">
+				<div data-is="statement">
+					<p>Nutshell? <i data-is="highlight">Multimedia generalist managing freelance specialists.</i> <b>Undone</b> completes unique projects requiring complex liason across a wide range of technical and creative fields.</p>
+					<a href="#contact" data-is="cta">Send us a brief</a>				
+				</div>
+			</article>
+
+			<article data-is="spec">
+				<h4>Specs: Audio</h4>
+				<div role="list">
+					<div role="listitem"><p>Procedural / Generative Audio</p></div>
+					<div role="listitem"><p>Custom DSP & Analysis</p></div>
+					<div role="listitem"><p>Soundtrack & Sound Design</p></div>
+					<div role="listitem"><p>Archive + LLM integration</p></div>
+					<div role="listitem"><p>Legacy DAW Virtual Machines</p></div>
+				</div>
+				<p data-is="meta">Rev. 2026.10 · Subject to change</p>
+			</article>
+
+			<article data-is="spec">
+				<h4>Specs: Visual</h4>
+				<div role="list">
+					<div role="listitem"><p>Procedural / Generative Visuals</p></div>
+					<div role="listitem"><p>Post-production & Compositing</p></div>
+					<div role="listitem"><p>2D↔2.5D↔3D Graphics</p></div>
+					<div role="listitem"><p>Automated Post Pipelines</p></div>
+				</div>
+				<p data-is="meta">Rev. 2026.10 · Subject to change</p>
+			</article>
+			
+			<article data-is="spec">
+				<h4>Specs: Media</h4>
+				<div role="list">
+					<div role="listitem"><p>DAM / MCP Pipelines</p></div>
+					<div role="listitem"><p>Metadata & Catalog</p></div>
+					<div role="listitem"><p>Massive Batch Processing</p></div>
+					<div role="listitem"><p>Format Conversion</p></div>
+				</div>
+				<p data-is="meta">Rev. 2026.10 · Subject to change</p>
+			</article>
+
+						<article data-is="spec">
+				<h4>Specs: Code</h4>
+				<div role="list">
+					<div role="listitem"><p>JavaScript / CSS / HTML</p></div>
+					<div role="listitem"><p>Django / Python / PostgreSQL</p></div>
+					<div role="listitem"><p>C++ / Qt</p></div>
+				</div>
+				<p data-is="meta">Rev. 2026.10 · Subject to change</p>
+			</article>
+
+<!-- SECTION -->
 			<div data-is="divider" id="contact">
 				<h2>Contact</h2>
 			</div>
 
 			<article data-is="dialog">
-				<div data-is="statement">
+				<div data-is="statement">					
 					<p><i data-is="highlight">Technical answers to creative questions. Creative solutions to technical problems.</i></p>
-
+					
 					<p>So what are we building?</p>
-					<a href="#" data-is="cta" data-u="info" data-d="undoneltd.com" data-copy aria-live="polite">Copy email</a>
+					<a href="#" data-is="cta" data-u="info" data-d="undoneltd.com" data-copy aria-live="polite">Copy email</a>				
 				</div>
 			</article>
-
+<!-- SECTION -->
 		</main>
 
 		<footer data-is="footer">
@@ -133,9 +250,9 @@
 			<div>
 				<h4>Info</h4>
 				<div data-is="footer-links">
-					<!-- <a href="#">Ethics</a>
+					<a href="#">Ethics</a>
 					<a href="#">Privacy</a>
-					<a href="#">Terms</a> -->
+					<a href="#">Terms</a>
 					<a href="#" data-u="info" data-d="undoneltd.com" data-copy aria-live="polite">Copy email</a>	
 				</div>
 			</div>
@@ -144,8 +261,8 @@
 				<div data-is="footer-links">
 					<a href="/">Home</a>
 					<a href="#about">About</a>
-					<!-- <a href="#projects">Projects</a>
-					<a href="#services">Services</a> -->
+					<a href="#projects">Projects</a>
+					<a href="#services">Services</a>
 				</div>
 			</div>
 			<!-- <form data-is="newsletter" action="#" method="post">

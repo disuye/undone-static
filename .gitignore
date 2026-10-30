@@ -2,5 +2,4 @@
 .vscode
 _construction/
 index-content.html
-assets/media/
-*.mp4
+assets/ignore/
