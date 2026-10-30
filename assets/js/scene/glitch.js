@@ -3,12 +3,15 @@
 //   scheduler  random bursts (Poisson, min gap), stuttered at tape-frame rate, single flash per burst
 //   displace   slanted tear bands, per-line jitter, wave, vertical hold slip, depth-sliced offset
 //   overlay    bright bars with teal halo, tape dropouts, luma smear, blowout flash, aperture stripes, scanlines
+//   image      subliminal full-screen still (cover-fit) for a few frames inside some bursts, torn with the scene,
+//              then a faint phosphor afterglow that outlives the burst. Every ~90–120 s a long hold: a full burst
+//              cuts to the still, it stays for seconds under the idle interference, then fades back to the scene
 // Depth: own half-res depth render (packed RGBA), only on frames where a burst is live.
-import { Color, FullScreenQuad, Pass, ShaderMaterial, Vector2, Vector3, WebGLRenderTarget } from '../vendor/three.module.js';
+import { CanvasTexture, Color, FullScreenQuad, Pass, ShaderMaterial, Vector2, Vector3, WebGLRenderTarget } from '../vendor/three.module.js';
 import { rng } from './parts.js';
 
 export const GLITCH = {
-  enabled: false,           // false = pass skipped entirely: no draw, no depth render, nothing compiled. Read every frame
+  enabled: true,           // false = pass skipped entirely: no draw, no depth render, nothing compiled. Read every frame
   // timing
   strength: 1,            // master 0–1, scales every burst (0 = off; idle layer stays)
   rate: 0.22,             // average bursts per second
@@ -43,7 +46,18 @@ export const GLITCH = {
   lineTint: [0.93, 0.93, 1.0],
   haloTint: [0.04, 0.32, 0.55],
   flashTint: [1, 0.84, 0.95],
+  // subliminal image
+  image: 0.45,            // chance per burst of flashing the still (0 = never, image not loaded)
+  imageLength: [0.05, 0.2], // on-screen time, s (≈ 1–5 tape frames)
+  imageOpacity: 1,
+  afterglow: 0.3,         // opacity the still drops to once the flash ends (0 = hard cut)
+  decay: 0.8,             // afterglow fade time constant, s (≈ gone after 3×)
+  holdEvery: [90, 120],   // s between long holds (null = never)
+  hold: [10, 15],           // how long the still stays up, s
+  holdFade: 2.5,          // fade back to the scene, s
 };
+
+const IMAGE_URL = new URL('../../img/glitch.jpg', import.meta.url).href;
 
 const BARS = 6;
 const clearColor = new Color();
@@ -68,7 +82,8 @@ const depthMaterial = new ShaderMaterial({
 
 const glitchMaterial = new ShaderMaterial({
   uniforms: {
-    tDiffuse: { value: null }, tDepth: { value: null }, uRes: { value: new Vector2(1, 1) },
+    tDiffuse: { value: null }, tDepth: { value: null }, tImage: { value: null }, uRes: { value: new Vector2(1, 1) },
+    uImage: { value: 0 }, uImageScale: { value: new Vector2(1, 1) },
     uTime: { value: 0 }, uSeed: { value: 0 }, uAmount: { value: 0 }, uIdle: { value: 0 }, uFlash: { value: 0 }, uRoll: { value: 0 },
     uTear: { value: 0 }, uShare: { value: 0 }, uSkew: { value: 0 }, uJitter: { value: 0 }, uWave: { value: 0 }, uBleed: { value: 0 }, uSmear: { value: 0 },
     uDepth: { value: 0 }, uLayers: { value: 0 }, uRange: { value: new Vector2() }, uClip: { value: new Vector2() },
@@ -78,10 +93,10 @@ const glitchMaterial = new ShaderMaterial({
   vertexShader,
   fragmentShader: /* glsl */ `
     #include <packing>
-    uniform sampler2D tDiffuse, tDepth;
-    uniform vec2 uRes, uRange, uClip;
+    uniform sampler2D tDiffuse, tDepth, tImage;
+    uniform vec2 uRes, uRange, uClip, uImageScale;
     uniform vec3 uLineTint, uHaloTint, uFlashTint;
-    uniform float uTime, uSeed, uAmount, uIdle, uFlash, uRoll;
+    uniform float uTime, uSeed, uAmount, uIdle, uFlash, uRoll, uImage;
     uniform float uTear, uShare, uSkew, uJitter, uWave, uBleed, uSmear;
     uniform float uDepth, uLayers, uLines, uCount, uDropout, uSnow, uStripes, uScan;
     varying vec2 vUv;
@@ -147,6 +162,17 @@ const glitchMaterial = new ShaderMaterial({
         texture2D(tDiffuse, uv - bleed).b
       );
 
+      // subliminal still: same displaced uv, so it tears, rolls and bleeds with the frame
+      if (uImage > 0.0) {
+        vec2 iuv = (uv - 0.5) * uImageScale + 0.5;
+        vec3 img = vec3(
+          texture2D(tImage, iuv + bleed).r,
+          texture2D(tImage, iuv).g,
+          texture2D(tImage, iuv - bleed).b
+        );
+        col = mix(col, img, uImage);
+      }
+
       // luma smear: bright edges trail to the right, ragged per line
       if (uSmear > 0.0 && live > 0.0) {
         float len = uSmear * (0.25 * uIdle + a) * (0.4 + hash12(vec2(line, uSeed)));
@@ -156,7 +182,7 @@ const glitchMaterial = new ShaderMaterial({
           vec3 s = texture2D(tDiffuse, uv - vec2(k * len, 0.0)).rgb;
           trail = max(trail, s * (1.0 - k) * smoothstep(0.45, 0.95, luma(s)));
         }
-        col = max(col, trail * vec3(0.85, 0.95, 1.0));
+        col = max(col, trail * vec3(0.85, 0.95, 1.0) * (1.0 - uImage));
       }
 
       col += (hash12(gl_FragCoord.xy + uSeed * 17.0) - 0.5) * uSnow * torn * a;
@@ -206,16 +232,51 @@ const smooth = (e0, e1, x) => { const t = Math.min(1, Math.max(0, (x - e0) / (e1
 // Burst timeline. Times are absolute (drawn from a seeded rng), so the sequence doesn't depend on frame rate.
 const createScheduler = (p, seed = 1984) => {
   const rand = rng(seed);
+  const randHold = rng(seed + 1);                                       // own stream: holds don't reshuffle burst timing
   let next = null; let burst = null; let id = 0; let lastFlash = -Infinity; let kick = 0;
+  let still = null;                                                     // last image window; outlives its burst for the afterglow
+  let nextHold = null;
+  const holdGap = () => (p.holdEvery ? lerp(p.holdEvery, randHold()) : Infinity);
   const gap = () => p.gap + -Math.log(1 - rand()) / Math.max(p.rate, 1e-3);
   const start = (t, len, peak) => {
     const flash = t - lastFlash > p.gap && rand() < 0.65;
     if (flash) lastFlash = t;
-    burst = { t0: t, len, peak, flash, roll: rand() < p.roll ? (rand() - 0.5) * 0.7 : 0, id: ++id };
+    const roll = rand() < p.roll ? (rand() - 0.5) * 0.7 : 0;
+    id += 1;
+    burst = { t0: t, len, peak, flash, roll, id };
+    if (!still?.hold) still = imageWindow(t, len) ?? still;            // bursts during a hold glitch over it, never replace it
+  };
+  // a full burst tears in, the still lands a few tape frames later and stays
+  const startHold = (t) => {
+    start(t, 0.6, 1);
+    still = { t0: t + 0.12, dur: lerp(p.hold, randHold()), hold: true };
+    nextHold = t + holdGap();
+  };
+  // hash, not rand(): adding the image doesn't shift the seeded burst sequence
+  const imageWindow = (t, len) => {
+    if (hash(id * 5.17) >= p.image) return null;
+    const dur = lerp(p.imageLength, hash(id * 3.73));
+    return { t0: t + hash(id * 9.41) * Math.max(0, len - dur), dur };
+  };
+
+  // full on for the window. Flashes then drop to the afterglow level and decay exponentially, like phosphor
+  // persistence; holds ease out over holdFade
+  const stillLevel = (t) => {
+    if (!still || t < still.t0) return 0;
+    const since = t - (still.t0 + still.dur);
+    if (since < 0) return p.imageOpacity;
+    const glow = still.hold
+      ? 1 - smooth(0, p.holdFade, since)
+      : p.afterglow * Math.exp(-since / Math.max(p.decay, 1e-3));
+    if (glow < 0.004) still = null;
+    return glow < 0.004 ? 0 : glow * p.imageOpacity;
   };
 
   const update = (t, dt, speed) => {
     if (next === null) next = p.intro > 0 ? t + 0.3 : t + gap();
+    if (nextHold === null) nextHold = t + holdGap();
+    if (!burst && t - nextHold > 1) nextHold = t + holdGap();            // tab was hidden
+    if (!burst && t >= nextHold) startHold(t);
     if (!burst && t - next > 1) next = t + gap();                        // tab was hidden: don't replay missed bursts
     if (!burst && t >= next) {
       start(next, id === 0 && p.intro > 0 ? p.intro : lerp(p.length, rand()), id === 0 && p.intro > 0 ? 1 : 0.45 + 0.55 * rand());
@@ -234,21 +295,26 @@ const createScheduler = (p, seed = 1984) => {
       flash = burst.flash ? burst.peak * Math.exp(-(t - burst.t0) / 0.07) : 0;
       roll = burst.roll && shape > 0.5 ? burst.roll + (hash(frame) - 0.5) * 0.02 : 0;
     }
+    const image = stillLevel(t);
     return {
       amount: Math.min(1, Math.max(amount, kick)) * p.strength,
       flash: flash * p.flash * p.strength,
       roll: roll * p.strength,
+      image: image * p.strength,
       seed: frame + (burst?.id ?? 0) * 131,
     };
   };
 
   const trigger = (t, len = 0.4, peak = 1) => { if (!burst) start(t, len, peak); };
-  return { update, trigger };
+  const hold = (t) => startHold(t);                                     // manual: cuts any running burst
+  return { update, trigger, hold };
 };
 
 let current = null;
 // Fire a burst from anywhere (section change, click): triggerGlitch(0.3, 0.8). No-op without a live pass.
 export const triggerGlitch = (len, peak) => current?.trigger(len, peak);
+// Fire a long hold now (also resets the hold timer).
+export const triggerHold = () => current?.hold();
 
 export class GlitchPass extends Pass {
   constructor(scene, camera, params = GLITCH) {
@@ -260,8 +326,26 @@ export class GlitchPass extends Pass {
     this.quad = new FullScreenQuad(glitchMaterial);
     this.schedule = createScheduler(params);
     this.time = 0;
-    this.state = { amount: 0, flash: 0, roll: 0, seed: 0 };
+    this.state = { amount: 0, flash: 0, roll: 0, image: 0, seed: 0 };
+    this.image = null;
+    this.imagePending = null;
+    if (params.image > 0 || params.holdEvery) this.loadImage();
     current = this;
+  }
+
+  // Decoded off the main thread; uploaded to the GPU on the next render, not mid-burst.
+  loadImage() {
+    const img = new Image();
+    img.src = IMAGE_URL;
+    img.decode().then(() => { this.imagePending = new CanvasTexture(img); }, () => {});
+  }
+
+  // cover-fit: fill the screen, crop the overflow axis
+  imageScale(target) {
+    const { width, height } = this.image.image;
+    const screen = glitchMaterial.uniforms.uRes.value;
+    const ratio = (screen.x / screen.y) / (width / height);
+    return ratio > 1 ? target.set(1, 1 / ratio) : target.set(ratio, 1);
   }
 
   // Called once per frame before composer.render(). speed: camera travel, m/s.
@@ -271,6 +355,8 @@ export class GlitchPass extends Pass {
   }
 
   trigger(len, peak) { this.schedule.trigger(this.time, len, peak); }
+
+  hold() { this.schedule.hold(this.time); }
 
   setSize(width, height) {
     glitchMaterial.uniforms.uRes.value.set(width, height);
@@ -303,8 +389,17 @@ export class GlitchPass extends Pass {
       renderer.setClearColor(clearColor, alpha);
     }
 
+    if (this.imagePending) {
+      renderer.initTexture(this.imagePending);
+      this.image = this.imagePending;
+      this.imagePending = null;
+    }
+
     u.tDiffuse.value = readBuffer.texture;
     u.tDepth.value = this.depth.texture;
+    u.tImage.value = this.image;
+    u.uImage.value = this.image ? s.image : 0;
+    if (this.image) this.imageScale(u.uImageScale.value);
     u.uTime.value = this.time;
     u.uSeed.value = s.seed;
     u.uAmount.value = s.amount;
@@ -339,6 +434,8 @@ export class GlitchPass extends Pass {
   dispose() {
     this.depth.dispose();
     this.quad.dispose();
+    this.image?.dispose();
+    this.imagePending?.dispose();
     if (current === this) current = null;
   }
 }

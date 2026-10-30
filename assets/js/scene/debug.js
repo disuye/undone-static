@@ -10,7 +10,7 @@
 //                          the hall is closed, so any green is a missing or back-facing surface
 //   &hud                   on-screen stats; &bench runs a timed benchmark after warm-up
 //   &glitch[=0.8|off]      VHS glitch strength, or off. With &still it is off unless given, so QA renders stay clean;
-//                          __scene3d.glitch(len, peak) fires a burst, __scene3d.GLITCH tunes it live
+//                          __scene3d.glitch(len, peak) fires a burst, __scene3d.hold() the long image hold, __scene3d.GLITCH tunes it live
 
 // URL options
 // ?debug: makes the scene's controls and per-frame stats available from the browser console as window.__scene3d.
@@ -19,12 +19,12 @@
 // &cam=x,y,z&look=x,y,z: fixes the camera in place. If you give a camera position without &look, it aims at the orb (0, 1.65, −6), not cfk's default target.
 // &holes[=0.45]: green background, no haze, camera tilted down. The hall is fully enclosed, so any green you see is a missing surface. I ran it at the opening shot and saw no green.
 // &hud&bench: on-screen fps, draw calls and triangle count. After 3 seconds it times 120 frames and shows the average and slowest-5% frame times.
-// &glitch[=0.8|off]: sets the glitch strength or turns it off. With &still the glitch is off unless you give this, so test renders stay clean. From the console, __scene3d.glitch(len, peak) fires a burst and __scene3d.GLITCH lets you tune values live.
+// &glitch[=0.8|off]: sets the glitch strength or turns it off. With &still the glitch is off unless you give this, so test renders stay clean. From the console, __scene3d.glitch(len, peak) fires a burst, __scene3d.hold() fires the long image hold, and __scene3d.GLITCH lets you tune values live.
 
 
 
 import { Color } from '../vendor/three.module.js';
-import { GLITCH, triggerGlitch } from './glitch.js';
+import { GLITCH, triggerGlitch, triggerHold } from './glitch.js';
 
 const vec = (s) => (s ? s.split(',').map(Number) : null);
 
@@ -81,6 +81,7 @@ export const attach = ({ canvas, renderer, scene, camera, draw, hooks, setLoop, 
   else if (params.has('still')) Object.assign(GLITCH, { strength: 0, idle: 0 });
   api.GLITCH = GLITCH;
   api.glitch = (len, peak) => triggerGlitch(len, peak);
+  api.hold = () => triggerHold();
 
   // Benchmark: n back-to-back frames, each forced to finish on the GPU.
   // A 1-px readPixels is the sync: gl.finish() returns early on Chrome/ANGLE-Metal and under-reports ~2×.
