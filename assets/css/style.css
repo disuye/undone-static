@@ -540,8 +540,9 @@ article figure img,
 
 article figure :is(img, video, iframe) {
 	aspect-ratio: 16 / 9;
-	object-fit: cover;
+	object-fit: contain;
 	border: 0;
+	background-color: var(--ink-55);
 }
 
 [data-is="photo"] {
@@ -635,6 +636,10 @@ main > [data-is="spec"] {
 
 [data-is="spec"] [role="listitem"]:hover {
 	background-color: var(--neon);
+}
+
+[data-is="card"] [role="listitem"] {
+		border-block-start: var(--hairline) solid var(--rule-ink);
 }
 
 main {
