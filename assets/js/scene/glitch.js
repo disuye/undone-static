@@ -52,7 +52,7 @@ export const GLITCH = {
   imageOpacity: 1,
   afterglow: 0.3,         // opacity the still drops to once the flash ends (0 = hard cut)
   decay: 0.8,             // afterglow fade time constant, s (≈ gone after 3×)
-  holdEvery: [90, 120],   // s between long holds (null = never)
+  holdEvery: [70, 90],   // s between long holds (null = never)
   hold: [10, 15],           // how long the still stays up, s
   holdFade: 2.5,          // fade back to the scene, s
 };
