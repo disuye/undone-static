@@ -828,10 +828,10 @@ textarea {
 	gap: var(--space-s);
 	padding-block-start: var(--space-s);
 	border-block-start: var(--hairline) solid var(--rule);
+	opacity: 0.7;
 	font: var(--step--2) / 1 var(--font-mono);
 	text-transform: uppercase;
 	letter-spacing: var(--track-caps);
-	opacity: 0.7;
 }
 
 @media (min-width: 64rem) {
