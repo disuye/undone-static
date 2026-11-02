@@ -82,6 +82,11 @@
 	--nav-h: 3.5rem;
 	--icon: 1.5rem;
 	--hazard: 0.75rem;
+	/* 3D switch: box in em (tracks the label); stroke + knob travel in its 26 × 16 viewBox units (knob cx 8 → 18) */
+	--switch-w: 1.625em;
+	--switch-h: 1em;
+	--switch-stroke: 1.5;
+	--switch-travel: 10px;
 
 	--t-fast: 50ms;
 	--t: 150ms;
@@ -373,15 +378,15 @@ nav > [data-is="undone-text-logo"] {
 }
 
 [data-toggle="motion"] svg {
-	inline-size: 1.625em;
-	block-size: 1em;
+	inline-size: var(--switch-w);
+	block-size: var(--switch-h);
 	overflow: visible;
 }
 
 [data-toggle="motion"] rect {
 	fill: transparent;
 	stroke: currentColor;
-	stroke-width: 1.5;
+	stroke-width: var(--switch-stroke);
 	transition: fill var(--t-slow) var(--ease);
 }
 
@@ -396,7 +401,7 @@ nav > [data-is="undone-text-logo"] {
 
 [data-toggle="motion"][aria-checked="true"] circle {
 	fill: var(--ink);
-	translate: 10px 0;
+	translate: var(--switch-travel) 0;
 }
 
 [data-is="nav-menu"] {
