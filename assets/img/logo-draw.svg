@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="501.011 655.249 440.869 101.977" role="img" aria-label="Undone">
 	<style>
 		/* Pen speed in path units per second; --at / --len are distances along the pen route */
-		:root { --v: 720; --pre: 900ms; --end: calc(1247 * 1s / var(--v) + var(--pre)); }
+		:root { --v: 840; --pre: 500ms; --end: calc(1247 * 1s / var(--v) + var(--pre)); }
 
 		.ink {
 			fill: none;
