@@ -1,6 +1,6 @@
 const TILE_PX = 10;
 const BULGE = -0.2;
-const TEXTURE_SRC = 'assets/img/rgb.png';
+const TEXTURE_SRC = new URL('../img/rgb.png', document.currentScript.src).href;
 
 const VERTEX = `
   attribute vec2 a_pos;

@@ -341,6 +341,11 @@ nav > [data-is="undone-text-logo"] {
 	[data-is="hk-time"] { display: none; }
 }
 
+[data-is="nav-actions"] {
+	display: flex;
+	gap: var(--space-3xs);
+}
+
 [data-is="menu-button"] {
 	padding: var(--space-2xs) var(--space-s);
 	background: var(--ink);
@@ -348,6 +353,50 @@ nav > [data-is="undone-text-logo"] {
 
 [data-is="menu-button"]:hover {
 	color: var(--neon);
+}
+
+/* iOS-style switch: hollow track + knob left when off, filled track + knob right when on */
+[data-toggle="motion"] {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--space-2xs);
+	transition: color var(--t-fast) var(--ease), scale var(--t) var(--ease), opacity var(--t-slow) var(--ease);
+}
+
+[data-toggle="motion"][hidden] {
+	display: none;
+}
+
+/* Unhidden late by scene/index.js; fade in rather than pop */
+@starting-style {
+	[data-toggle="motion"] { opacity: 0; }
+}
+
+[data-toggle="motion"] svg {
+	inline-size: 1.625em;
+	block-size: 1em;
+	overflow: visible;
+}
+
+[data-toggle="motion"] rect {
+	fill: transparent;
+	stroke: currentColor;
+	stroke-width: 1.5;
+	transition: fill var(--t-slow) var(--ease);
+}
+
+[data-toggle="motion"] circle {
+	fill: currentColor;
+	transition: translate var(--t-slow) var(--ease-spring), fill var(--t-slow) var(--ease);
+}
+
+[data-toggle="motion"][aria-checked="true"] rect {
+	fill: currentColor;
+}
+
+[data-toggle="motion"][aria-checked="true"] circle {
+	fill: var(--ink);
+	translate: 10px 0;
 }
 
 [data-is="nav-menu"] {
@@ -861,4 +910,5 @@ textarea {
 @media (prefers-reduced-motion: reduce) {
 	html { scroll-behavior: auto; }
 	[data-is="scroll-cue"] { animation: none; }
+	[data-toggle="motion"] :is(rect, circle) { transition: none; }
 }

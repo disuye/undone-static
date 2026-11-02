@@ -109,6 +109,19 @@ const closeMenuOnNavigate = (menu) => {
   });
 };
 
+// Persisted on/off for the 3D scene; scene/index.js reads <html data-motion> and listens for 'motionchange'.
+const toggleMotion = (button) => {
+  const root = document.documentElement;
+  const set = (on) => {
+    root.dataset.motion = on ? 'on' : 'off';
+    button.setAttribute('aria-checked', String(on));
+    localStorage.setItem('motion', root.dataset.motion);
+    document.dispatchEvent(new Event('motionchange'));
+  };
+  set(localStorage.getItem('motion') !== 'off');
+  button.addEventListener('click', () => set(root.dataset.motion === 'off'));
+};
+
 const toggleDisclosure = (button) => {
   button.addEventListener('click', () => {
     button.setAttribute('aria-expanded', button.getAttribute('aria-expanded') !== 'true');
@@ -154,6 +167,7 @@ revealOnScroll(document.querySelectorAll('main > *'));
 document.querySelectorAll('[data-is="vertical-logo"]').forEach(driveParallax);
 document.querySelectorAll('button[aria-controls][aria-expanded]').forEach(toggleDisclosure);
 document.querySelectorAll('[data-is="nav-menu"]').forEach(closeMenuOnNavigate);
+document.querySelectorAll('[data-toggle="motion"]').forEach(toggleMotion);
 document.querySelectorAll('[data-is="hk-time"]').forEach(showHongKongTime);
 document.querySelectorAll('a[data-u][data-d]:not([data-copy])').forEach(revealMailto);
 document.querySelectorAll('a[data-u][data-d][data-copy]').forEach(copyEmail);

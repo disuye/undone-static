@@ -23,6 +23,10 @@
 	opacity: 1;
 }
 
+[data-motion="off"] [data-is="scene"] {
+	opacity: 0;
+}
+
 main > :is(article, figure):not([data-is="photo"]) {
 	backdrop-filter: blur(var(--scene-blur));
 }
