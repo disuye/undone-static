@@ -91,7 +91,6 @@ const initCrt = async (canvas) => {
 
   render();
   addEventListener('resize', render);
-  canvas.dataset.gl = '';
 };
 
 const canvas = document.querySelector('[data-is="crt"]');

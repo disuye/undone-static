@@ -129,6 +129,5 @@ export const attach = ({ canvas, renderer, scene, camera, draw, hooks, setLoop, 
   }
 
   window.__scene3d = api;
-  canvas.dataset.debug = '';
   return api;
 };

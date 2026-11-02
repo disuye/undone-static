@@ -15,15 +15,11 @@
 	block-size: var(--vh-lock, 100lvh);
 	max-inline-size: none;
 	pointer-events: none;
-	opacity: 0;
+	opacity: var(--scene-ready, 0);   /* set to 1 by scene/index.js after the first frame */
 	transition: opacity var(--t-scene) var(--ease);
 }
 
-[data-is="scene"][data-ready] {
-	opacity: 1;
-}
-
-[data-motion="off"] [data-is="scene"] {
+:root:has([data-is="nav-actions"] > [role="switch"][aria-checked="false"]) [data-is="scene"] {
 	opacity: 0;
 }
 

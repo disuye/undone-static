@@ -361,45 +361,45 @@ nav > [data-is="undone-text-logo"] {
 }
 
 /* iOS-style switch: hollow track + knob left when off, filled track + knob right when on */
-[data-toggle="motion"] {
+[data-is="nav-actions"] > [role="switch"] {
 	display: inline-flex;
 	align-items: center;
 	gap: var(--space-2xs);
 	transition: color var(--t-fast) var(--ease), scale var(--t) var(--ease), opacity var(--t-slow) var(--ease);
 }
 
-[data-toggle="motion"][hidden] {
+[data-is="nav-actions"] > [role="switch"][hidden] {
 	display: none;
 }
 
 /* Unhidden late by scene/index.js; fade in rather than pop */
 @starting-style {
-	[data-toggle="motion"] { opacity: 0; }
+	[data-is="nav-actions"] > [role="switch"] { opacity: 0; }
 }
 
-[data-toggle="motion"] svg {
+[data-is="nav-actions"] > [role="switch"] svg {
 	inline-size: var(--switch-w);
 	block-size: var(--switch-h);
 	overflow: visible;
 }
 
-[data-toggle="motion"] rect {
+[data-is="nav-actions"] > [role="switch"] rect {
 	fill: transparent;
 	stroke: currentColor;
 	stroke-width: var(--switch-stroke);
 	transition: fill var(--t-slow) var(--ease);
 }
 
-[data-toggle="motion"] circle {
+[data-is="nav-actions"] > [role="switch"] circle {
 	fill: currentColor;
 	transition: translate var(--t-slow) var(--ease-spring), fill var(--t-slow) var(--ease);
 }
 
-[data-toggle="motion"][aria-checked="true"] rect {
+[data-is="nav-actions"] > [role="switch"][aria-checked="true"] rect {
 	fill: currentColor;
 }
 
-[data-toggle="motion"][aria-checked="true"] circle {
+[data-is="nav-actions"] > [role="switch"][aria-checked="true"] circle {
 	fill: var(--ink);
 	translate: var(--switch-travel) 0;
 }
@@ -900,14 +900,13 @@ textarea {
 
 /* ---------- Reveal on scroll ---------- */
 
+/* main.js sets --revealed: 1 (and --reveal-delay) as each block enters the viewport */
 @media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
-	main > :not([data-revealed]) { opacity: 0; }
-	main > [data-revealed] { animation: reveal var(--t-reveal) var(--ease) var(--reveal-delay, 0ms) both; }
-}
-
-@keyframes reveal {
-	from { opacity: 0; translate: 0 var(--space-m); }
-	to { opacity: 1; translate: 0 0; }
+	main > * {
+		opacity: var(--revealed, 0);
+		translate: 0 calc((1 - var(--revealed, 0)) * var(--space-m));
+		transition: opacity var(--t-reveal) var(--ease) var(--reveal-delay, 0ms), translate var(--t-reveal) var(--ease) var(--reveal-delay, 0ms);
+	}
 }
 
 /* ---------- Motion preferences ---------- */
@@ -915,5 +914,5 @@ textarea {
 @media (prefers-reduced-motion: reduce) {
 	html { scroll-behavior: auto; }
 	[data-is="scroll-cue"] { animation: none; }
-	[data-toggle="motion"] :is(rect, circle) { transition: none; }
+	[data-is="nav-actions"] > [role="switch"] :is(rect, circle) { transition: none; }
 }

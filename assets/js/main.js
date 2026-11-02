@@ -1,9 +1,3 @@
-const revealMailto = (link) => {
-  const set = () => { link.href = `mailto:${link.dataset.u}@${link.dataset.d}`; };
-  ['mouseover', 'touchstart', 'focus'].forEach((type) =>
-    link.addEventListener(type, set, { once: true, passive: true }));
-};
-
 const copyEmail = (link) => {
   const label = link.textContent;
   const address = `${link.dataset.u}@${link.dataset.d}`;
@@ -109,17 +103,16 @@ const closeMenuOnNavigate = (menu) => {
   });
 };
 
-// Persisted on/off for the 3D scene; scene/index.js reads <html data-motion> and listens for 'motionchange'.
+// Persisted on/off for the 3D scene. The switch's aria-checked is the state: scene.css and
+// scene/index.js read it, and scene/index.js listens for 'motionchange'.
 const toggleMotion = (button) => {
-  const root = document.documentElement;
   const set = (on) => {
-    root.dataset.motion = on ? 'on' : 'off';
     button.setAttribute('aria-checked', String(on));
-    localStorage.setItem('motion', root.dataset.motion);
+    localStorage.setItem('motion', on ? 'on' : 'off');
     document.dispatchEvent(new Event('motionchange'));
   };
   set(localStorage.getItem('motion') !== 'off');
-  button.addEventListener('click', () => set(root.dataset.motion === 'off'));
+  button.addEventListener('click', () => set(button.getAttribute('aria-checked') !== 'true'));
 };
 
 const toggleDisclosure = (button) => {
@@ -151,12 +144,12 @@ const driveParallax = (el) => {
   update();
 };
 
-// Staggers cards that enter together; CSS keeps unrevealed cards hidden.
+// Staggers cards that enter together; CSS keeps cards hidden until --revealed is set.
 const revealOnScroll = (els) => {
   const observer = new IntersectionObserver((entries) => {
     entries.filter((e) => e.isIntersecting).forEach(({ target }, i) => {
       target.style.setProperty('--reveal-delay', `${i * 120}ms`);
-      target.dataset.revealed = '';
+      target.style.setProperty('--revealed', 1);
       observer.unobserve(target);
     });
   }, { rootMargin: '0px 0px -10% 0px' });
@@ -167,10 +160,9 @@ revealOnScroll(document.querySelectorAll('main > *'));
 document.querySelectorAll('[data-is="vertical-logo"]').forEach(driveParallax);
 document.querySelectorAll('button[aria-controls][aria-expanded]').forEach(toggleDisclosure);
 document.querySelectorAll('[data-is="nav-menu"]').forEach(closeMenuOnNavigate);
-document.querySelectorAll('[data-toggle="motion"]').forEach(toggleMotion);
+document.querySelectorAll('[data-is="nav-actions"] > [role="switch"]').forEach(toggleMotion);
 document.querySelectorAll('[data-is="hk-time"]').forEach(showHongKongTime);
-document.querySelectorAll('a[data-u][data-d]:not([data-copy])').forEach(revealMailto);
-document.querySelectorAll('a[data-u][data-d][data-copy]').forEach(copyEmail);
+document.querySelectorAll('a[data-u][data-d]').forEach(copyEmail);
 document.querySelectorAll('[data-is="split-headline"]').forEach(fitHeadline);
 lockViewportHeight();
 watchPixelRatio();
