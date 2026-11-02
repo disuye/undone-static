@@ -104,7 +104,7 @@
 	/* Wordmark viewBox 3156 × 730. Flat caps span y 19–710, so ×1.07 pushes them just past
 	   the viewport edges (O overshoot clipped). Length follows from the scaled width. */
 	--logo-ratio: calc(3156 / 730);
-	--logo-src: url("../img/logo.svg");
+	--logo-src: url("../img/logo-draw.svg");
 	--logo-scale: 1.07;
 	--logo-width: calc(100vw * var(--logo-scale));
 	--logo-length: calc(var(--logo-width) * var(--logo-ratio));
