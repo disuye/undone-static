@@ -93,12 +93,16 @@
 	--t-slow: 300ms;
 	--t-cue: 2s;
 	--t-reveal: 600ms;
+	/* Mirrors --end in logo-draw.svg (route length / --v + --pre). An SVG loaded as an image
+	   can't read page CSS, so keep the two in sync by hand. */
+	--t-logo-draw: calc(1247s / 840 + 500ms);
 	--ease: ease-in-out;
 	--ease-spring: linear(0, 0.42 12%, 0.84 26%, 1.06 42%, 1.02 58%, 0.99 74%, 1);
 
 	--z-bg: -1;
 	--z-nav: 50;
 	--z-crt: 100;
+	--z-intro: 200;
 	--crt-opacity: 0.1;
 
 	/* Wordmark viewBox 3156 × 730. Flat caps span y 19–710, so ×1.07 pushes them just past
@@ -253,6 +257,23 @@ i {
 
 :is([data-is="cta"], [data-is="icon-contact"]):hover::after {
 	translate: var(--space-3xs) 0;
+}
+
+/* ---------- Intro ---------- */
+
+/* Page fades up from black while logo-draw.svg draws itself */
+body::after {
+	content: "";
+	position: fixed;
+	inset: 0;
+	z-index: var(--z-intro);
+	background: var(--ink);
+	pointer-events: none;
+	animation: intro var(--t-logo-draw) var(--ease) forwards;
+}
+
+@keyframes intro {
+	to { opacity: 0; visibility: hidden; }
 }
 
 /* ---------- Background layers ---------- */
@@ -913,6 +934,7 @@ textarea {
 
 @media (prefers-reduced-motion: reduce) {
 	html { scroll-behavior: auto; }
+	body::after { display: none; }
 	[data-is="scroll-cue"] { animation: none; }
 	[data-is="nav-actions"] > [role="switch"] :is(rect, circle) { transition: none; }
 }
