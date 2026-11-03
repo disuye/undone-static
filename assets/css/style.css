@@ -93,9 +93,14 @@
 	--t-slow: 300ms;
 	--t-cue: 2s;
 	--t-reveal: 600ms;
-	/* Mirrors --end in logo-draw.svg (route length / --v + --pre). An SVG loaded as an image
-	   can't read page CSS, so keep the two in sync by hand. */
-	--t-logo-draw: calc(1247s / 840 + 500ms);
+	/* Mirrors logo-draw.svg: pen speed, lead-in, and route distances to the 2nd N's start and the E's
+	   end. An SVG loaded as an image can't read page CSS, so keep the two in sync by hand. */
+	--logo-v: 840;
+	--logo-pre: 500ms;
+	--logo-n2: 777;
+	--logo-end: 1247;
+	--t-logo-n2: calc(var(--logo-n2) * 1s / var(--logo-v) + var(--logo-pre));
+	--t-logo-draw: calc(var(--logo-end) * 1s / var(--logo-v) + var(--logo-pre));
 	--ease: ease-in-out;
 	--ease-spring: linear(0, 0.42 12%, 0.84 26%, 1.06 42%, 1.02 58%, 0.99 74%, 1);
 
@@ -496,6 +501,12 @@ nav > [data-is="undone-text-logo"] {
 	font: 500 var(--step--2) / 1 var(--font-mono);
 	text-transform: uppercase;
 	letter-spacing: var(--track-caps);
+	animation: fade-in calc(var(--t-logo-draw) - var(--t-logo-n2)) var(--ease) var(--t-logo-n2) backwards;
+}
+
+/* Tagline fades in alongside the logo's second gesture (2nd N → E) */
+@keyframes fade-in {
+	from { opacity: 0; }
 }
 
 [data-is="scroll-cue"] {
@@ -935,6 +946,6 @@ textarea {
 @media (prefers-reduced-motion: reduce) {
 	html { scroll-behavior: auto; }
 	body::after { display: none; }
-	[data-is="scroll-cue"] { animation: none; }
+	:is([data-is="scroll-cue"], [data-is="splash"] > p) { animation: none; }
 	[data-is="nav-actions"] > [role="switch"] :is(rect, circle) { transition: none; }
 }
