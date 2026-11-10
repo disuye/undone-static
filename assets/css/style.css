@@ -93,6 +93,7 @@
 	--t-slow: 300ms;
 	--t-cue: 2s;
 	--t-reveal: 600ms;
+	--t-teleport: 700ms;
 	/* Mirrors logo-draw.svg: pen speed, lead-in, and route distances to the 2nd N's start and the E's
 	   end. An SVG loaded as an image can't read page CSS, so keep the two in sync by hand. */
 	--logo-v: 840;
@@ -222,6 +223,25 @@ i {
 
 [data-is="highlight"] {
 	color: var(--neon);
+}
+
+/* One iteration dematerialises; the alternate second iteration replays it backwards to rematerialise.
+   main.js swaps the word on 'animationiteration' and restarts the cycle by re-adding data-beaming. */
+[data-is="teleport"] {
+	display: inline-block;
+}
+
+[data-is="teleport"][data-beaming] {
+	animation: teleport var(--t-teleport) linear var(--beam-delay, 0ms) 2 alternate both;
+}
+
+@keyframes teleport {
+	0%, 9%, 13%, 22% { opacity: 1; }
+	10%, 12% { opacity: 0.25; }
+	23%, 25% { opacity: 0.5; }
+	30% { opacity: 1; filter: none; text-shadow: none; scale: 1; }
+	60% { opacity: 0.8; filter: blur(0.02em) brightness(1.6); text-shadow: 0 -0.1em 0.2em currentColor, 0 0.1em 0.2em currentColor; }
+	100% { opacity: 0; filter: blur(0.12em) brightness(3); text-shadow: 0 -0.4em 0.5em currentColor, 0 0.4em 0.5em currentColor; scale: 1.04 1.5; }
 }
 
 [data-is="undone-text-logo"] {

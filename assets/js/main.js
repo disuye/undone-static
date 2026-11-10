@@ -188,6 +188,35 @@ const bufferNearViewport = (videos) => {
   videos.forEach((v) => observer.observe(v));
 };
 
+// Words in one sentence trade places; each slot keeps its own capitalisation so the sentence still reads.
+const teleportWords = (slots) => {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const words = slots.map((el) => el.textContent.toLowerCase());
+  const caps = slots.map((el) => el.textContent[0] !== el.textContent[0].toLowerCase());
+  const HOLD = 2500;
+  let shift = 0;
+
+  const show = (el, i) => {
+    const word = words[(i + shift) % words.length];
+    el.textContent = caps[i] ? word[0].toUpperCase() + word.slice(1) : word;
+  };
+
+  const beam = (el, i) => new Promise((resolve) => {
+    el.style.setProperty('--beam-delay', `${Math.round(Math.random() * 120)}ms`);
+    el.addEventListener('animationiteration', () => show(el, i), { once: true });
+    el.addEventListener('animationend', () => { el.removeAttribute('data-beaming'); resolve(); }, { once: true });
+    el.setAttribute('data-beaming', '');
+  });
+
+  const cycle = async () => {
+    shift += 1;
+    await Promise.all(slots.map(beam));
+    setTimeout(cycle, HOLD + Math.random() * 1000);
+  };
+
+  setTimeout(cycle, HOLD);
+};
+
 revealOnScroll(document.querySelectorAll('main > *'));
 document.querySelectorAll('[data-is="clip"]').forEach(playOnClick);
 bufferNearViewport(document.querySelectorAll('[data-is="clip"] > video'));
@@ -198,5 +227,7 @@ document.querySelectorAll('[data-is="nav-actions"] > [role="switch"]').forEach(t
 document.querySelectorAll('[data-is="hk-time"]').forEach(showHongKongTime);
 document.querySelectorAll('a[data-u][data-d]').forEach(copyEmail);
 document.querySelectorAll('[data-is="split-headline"]').forEach(fitHeadline);
+new Set([...document.querySelectorAll('[data-is="teleport"]')].map((el) => el.parentElement))
+  .forEach((sentence) => teleportWords([...sentence.querySelectorAll(':scope > [data-is="teleport"]')]));
 lockViewportHeight();
 watchPixelRatio();
