@@ -156,7 +156,41 @@ const revealOnScroll = (els) => {
   els.forEach((el) => observer.observe(el));
 };
 
+// Overlay button toggles play/pause; video events (not the click) drive the label and icon state.
+const playOnClick = (figure) => {
+  const video = figure.querySelector('video');
+  const button = figure.querySelector('button');
+  const label = button.getAttribute('aria-label');
+
+  const sync = () => {
+    figure.toggleAttribute('data-playing', !video.paused);
+    button.setAttribute('aria-label', video.paused ? label : label.replace(/^Play/, 'Pause'));
+  };
+
+  button.addEventListener('click', () => (video.paused ? video.play() : video.pause()));
+  video.addEventListener('play', sync);
+  video.addEventListener('pause', sync);
+  button.hidden = false;
+};
+
+// Videos ship with preload="none" so they never compete with the scripts and 3D scene at startup;
+// buffering starts once a clip is within a viewport's distance. load() re-runs resource selection
+// with the new preload value (changing the attribute alone isn't honoured by every browser).
+const bufferNearViewport = (videos) => {
+  const observer = new IntersectionObserver((entries) => {
+    entries.filter((e) => e.isIntersecting).forEach(({ target }) => {
+      observer.unobserve(target);
+      if (!target.paused) return;
+      target.preload = 'auto';
+      target.load();
+    });
+  }, { rootMargin: '100% 0px' });
+  videos.forEach((v) => observer.observe(v));
+};
+
 revealOnScroll(document.querySelectorAll('main > *'));
+document.querySelectorAll('[data-is="clip"]').forEach(playOnClick);
+bufferNearViewport(document.querySelectorAll('[data-is="clip"] > video'));
 document.querySelectorAll('[data-is="vertical-logo"]').forEach(driveParallax);
 document.querySelectorAll('button[aria-controls][aria-expanded]').forEach(toggleDisclosure);
 document.querySelectorAll('[data-is="nav-menu"]').forEach(closeMenuOnNavigate);

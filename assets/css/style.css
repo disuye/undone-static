@@ -123,6 +123,7 @@
 	--menu-w: 28rem;
 	--footer-logo: clamp(10rem, 30vw, 24rem);
 
+	--icon-play: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M7 4.5v15L19.5 12z'/%3E%3C/svg%3E");
 	--icon-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 11h14.2l-5.6-5.6L13 4l8 8-8 8-1.4-1.4 5.6-5.6H3z'/%3E%3C/svg%3E");
 }
 
@@ -132,6 +133,7 @@ html {
 	background: var(--warmgray);
 	color: var(--paper);
 	overflow-x: clip;
+	/* overscroll-behavior-y: none; */
 	scroll-behavior: smooth;
 }
 
@@ -629,6 +631,64 @@ article figure :is(img, video, iframe) {
 	object-fit: contain;
 	border: 0;
 	background-color: var(--ink-55);
+}
+
+/* Poster + play overlay. The button is [hidden] in the markup and unhidden by main.js,
+   so without JS the poster shows alone. ::before is the disc, ::after the triangle. */
+[data-is="clip"] {
+	position: relative;
+}
+
+[data-is="clip"] > button {
+	--disc: var(--step-3);
+	position: absolute;
+	inset: 0;
+	display: grid;
+	place-items: center;
+	color: var(--paper);
+}
+
+[data-is="clip"] > button[hidden] {
+	display: none;
+}
+
+[data-is="clip"] > button::before,
+[data-is="clip"] > button::after {
+	content: "";
+	grid-area: 1 / 1;
+	aspect-ratio: 1;
+	transition: opacity var(--t-slow) var(--ease), scale var(--t-slow) var(--ease-spring);
+}
+
+[data-is="clip"] > button::before {
+	inline-size: var(--disc);
+	border-radius: 50%;
+	background: rgb(var(--ink-rgb) / 0.5);
+}
+
+[data-is="clip"] > button::after {
+	inline-size: calc(var(--disc) * 2 / 3);
+	background: currentColor;
+	mask: var(--icon-play) center / contain no-repeat;
+}
+
+[data-is="clip"] > button:hover {
+	color: var(--neon);
+}
+
+[data-is="clip"] > button:active {
+	scale: none;
+}
+
+[data-is="clip"] > button:active::before,
+[data-is="clip"] > button:active::after {
+	scale: 0.9;
+}
+
+[data-is="clip"][data-playing] > button::before,
+[data-is="clip"][data-playing] > button::after {
+	opacity: 0;
+	scale: 0.8;
 }
 
 [data-is="photo"] {
