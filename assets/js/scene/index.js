@@ -77,7 +77,7 @@ const createScene = (renderer, tint, tier) => {
 
 // Pointer parallax, metres either side: ±0.9 m sideways ≈ 1.5 floor tiles (1.2 m) edge to edge.
 // Camera height spans 0.8–3 m; aiming at orb height keeps the view near level, so floor and ceiling share the frame.
-const PARALLAX = { x: 0.9, y: 1.1, look: 0.35 };
+const PARALLAX = { x: 2.2, y: 1.7, look: 0.5 };
 const EYE_HEIGHT = 1.9;
 
 // Camera dollies down the hall with page scroll; pointer adds parallax.
