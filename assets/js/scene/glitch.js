@@ -11,7 +11,7 @@ import { CanvasTexture, Color, FullScreenQuad, Pass, ShaderMaterial, Vector2, Ve
 import { rng } from './parts.js';
 
 export const GLITCH = {
-  enabled: true,           // false = pass skipped entirely: no draw, no depth render, nothing compiled. Read every frame
+  enabled: false,           // false = pass skipped entirely: no draw, no depth render, nothing compiled. Read every frame
   // timing
   strength: 1,            // master 0–1, scales every burst (0 = off; idle layer stays)
   rate: 0.22,             // average bursts per second
