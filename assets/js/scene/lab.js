@@ -81,7 +81,7 @@ const lights = () => {
   }));
 
   const key = new SpotLight(kelvin(CEILING_K), LIGHTING.key, 12, 0.55, 0.85, 2);
-  key.position.set(0.6, h - 0.15, CELL.z + 0.4);
+  key.position.set(0.6, h - 0.15, CELL.z + 0.9);   // clear of the portal beam face (z + 0.35)
   key.target.position.copy(CELL).setY(0);
   key.castShadow = true;
   key.shadow.bias = -0.0004;
