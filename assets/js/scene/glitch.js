@@ -11,10 +11,10 @@ import { CanvasTexture, Color, FullScreenQuad, Pass, ShaderMaterial, Vector2, Ve
 import { rng } from './parts.js';
 
 export const GLITCH = {
-  enabled: false,           // false = pass skipped entirely: no draw, no depth render, nothing compiled. Read every frame
+  enabled: true,           // false = pass skipped entirely: no draw, no depth render, nothing compiled. Read every frame
   // timing
   strength: 1,            // master 0–1, scales every burst (0 = off; idle layer stays)
-  rate: 0.22,             // average bursts per second
+  rate: 0.05,             // average bursts per second
   length: [0.12, 0.75],   // burst duration range, s
   gap: 0.6,               // min quiet time between bursts, s. Keeps flashes ≤ ~1.5/s (WCAG 2.3.1 limit is 3/s)
   intro: 0.55,            // "signal acquire" burst this long right after load (0 = none)
