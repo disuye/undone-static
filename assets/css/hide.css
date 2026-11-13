@@ -1,6 +1,10 @@
 [data-is="quote"],
 [data-is="card"],
 #projects,
-#about {
+#about,
+#menu,
+[data-is="nav-actions"],
+[data-is="footer-links"],
+[data-is="footer"] h4 {
     display: none;
 }
