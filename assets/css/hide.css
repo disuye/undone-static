@@ -1,0 +1,6 @@
+[data-is="quote"],
+[data-is="card"],
+#projects,
+#about {
+    display: none;
+}
