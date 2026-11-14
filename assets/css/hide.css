@@ -3,7 +3,7 @@
 #projects,
 #about,
 #menu,
-[data-is="nav-actions"],
+[popovertarget="menu"],
 [data-is="footer-links"],
 [data-is="footer"] h4 {
     display: none;
